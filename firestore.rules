@@ -1,0 +1,61 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    function signedIn() {
+      return request.auth != null;
+    }
+
+    function isAgent() {
+      return signedIn() && request.auth.token.agent == true;
+    }
+
+    match /inquiries/{inquiryId} {
+      allow create: if request.resource.data.status == 'new'
+        && request.resource.data.createdAt == request.time
+        && request.resource.data.contactName is string
+        && request.resource.data.contactName.size() > 0
+        && request.resource.data.email is string
+        && request.resource.data.email.size() > 3
+        && request.resource.data.message is string
+        && request.resource.data.message.size() <= 4000;
+      allow read: if isAgent();
+      allow update: if isAgent()
+        && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['status', 'updatedAt'])
+        && request.resource.data.status in ['new', 'in_progress', 'contacted', 'closed'];
+      allow delete: if false;
+    }
+
+    match /calls/{callId} {
+      allow create: if signedIn()
+        && request.resource.data.callerUid == request.auth.uid
+        && request.resource.data.status == 'ringing'
+        && request.resource.data.mode in ['voice', 'video']
+        && request.resource.data.channel is string
+        && request.resource.data.createdAt == request.time;
+      allow read: if isAgent() || (
+        signedIn()
+        && resource.data.callerUid == request.auth.uid
+      );
+      allow update: if (
+          isAgent()
+          && resource.data.status == 'ringing'
+          && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['status', 'agentUid', 'acceptedAt'])
+          && request.resource.data.status in ['accepted', 'declined']
+          && request.resource.data.agentUid == request.auth.uid
+        ) || (
+          signedIn()
+          && resource.data.callerUid == request.auth.uid
+          && resource.data.status in ['ringing', 'accepted']
+          && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['status', 'endedAt'])
+          && request.resource.data.status == 'ended'
+        ) || (
+          isAgent()
+          && resource.data.agentUid == request.auth.uid
+          && resource.data.status == 'accepted'
+          && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['status', 'endedAt'])
+          && request.resource.data.status == 'ended'
+        );
+      allow delete: if false;
+    }
+  }
+}

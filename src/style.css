@@ -1,0 +1,82 @@
+@import "tailwindcss";
+
+@layer base {
+  :root {
+    --color-gold: #c5a059;
+    --color-gold-bright: #e2ba64;
+    --color-coffee-dark: #0b0c0d;
+    --color-coffee-surface: #121413;
+    --color-coffee-emerald: #162c20;
+  }
+
+  body {
+    background-color: #0b0c0d;
+    color: #dcd9d0;
+    font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    overflow-x: hidden;
+  }
+
+  h1, h2, h3, .font-display {
+    font-family: 'Playfair Display', Georgia, serif;
+  }
+
+  .font-crest {
+    font-family: 'Cinzel', serif;
+    letter-spacing: 0.15em;
+  }
+}
+
+/* Custom luxury gradients and textures */
+.bg-radial-gradient-hero {
+  background: radial-gradient(circle at 50% 20%, rgba(20, 44, 32, 0.45) 0%, rgba(11, 12, 13, 0.95) 70%, #0b0c0d 100%);
+}
+
+.gold-border-gradient {
+  border-image: linear-gradient(to right, #c5a059, #8d7034, #c5a059) 1;
+}
+
+.gold-text-gradient {
+  background: linear-gradient(135deg, #f5e4b7 0%, #d4af37 50%, #9e782a 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+.gold-button-gradient {
+  background: linear-gradient(135deg, #dfbc68 0%, #c5a059 50%, #a48135 100%);
+  color: #0b0c0d;
+  font-weight: 700;
+  transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.gold-button-gradient:hover {
+  background: linear-gradient(135deg, #f0cf7e 0%, #d6b063 50%, #b89345 100%);
+  box-shadow: 0 0 25px rgba(197, 160, 89, 0.35);
+  transform: translateY(-2px);
+}
+
+.gold-outline-button {
+  border: 1px solid rgba(197, 160, 89, 0.6);
+  color: #e5c983;
+  transition: all 0.3s ease;
+}
+
+.gold-outline-button:hover {
+  background: rgba(197, 160, 89, 0.1);
+  border-color: #c5a059;
+  color: #ffffff;
+}
+
+/* Scrollbar styling */
+::-webkit-scrollbar {
+  width: 7px;
+}
+::-webkit-scrollbar-track {
+  background: #0b0c0d;
+}
+::-webkit-scrollbar-thumb {
+  background: #252826;
+  border-radius: 4px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: #c5a059;
+}

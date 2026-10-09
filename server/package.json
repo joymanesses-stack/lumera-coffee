@@ -1,0 +1,17 @@
+{
+  "dependencies": {
+    "firebase-admin": "^14.5.0",
+    "socket.io": "^4.8.4"
+  },
+  "name": "lumera-call-signaling",
+  "private": true,
+  "version": "1.0.0",
+  "type": "commonjs",
+  "scripts": {
+    "start": "node index.js",
+    "dev": "node --watch index.js"
+  },
+  "engines": {
+    "node": "22"
+  }
+}
