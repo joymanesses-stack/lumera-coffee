@@ -16,6 +16,12 @@ The website stores buyer inquiries and call requests in Firebase. The `/agent` d
    firebase deploy --only firestore:rules,firestore:indexes
    ```
 
+### Netlify environment variables
+
+For a Netlify deployment, add the six Firebase web-app values from `.env.example` under **Site configuration → Environment variables**: `VITE_FIREBASE_API_KEY`, `VITE_FIREBASE_AUTH_DOMAIN`, `VITE_FIREBASE_PROJECT_ID`, `VITE_FIREBASE_STORAGE_BUCKET`, `VITE_FIREBASE_MESSAGING_SENDER_ID`, and `VITE_FIREBASE_APP_ID`. Add `VITE_SIGNALING_SERVER_URL` after deploying the Socket.IO server. `VITE_FIREBASE_APPCHECK_SITE_KEY` is optional unless App Check is enabled.
+
+Vite embeds these values at build time. After saving them in Netlify, trigger a new production deploy (clear the build cache if the deployed site still reports missing configuration). The local `.env` file is intentionally ignored by Git and is not uploaded to Netlify.
+
 6. Create an agent account in Firebase Authentication.
 7. Install the signaling server dependencies and grant the agent claim. Authenticate the Firebase Admin SDK using Application Default Credentials:
 

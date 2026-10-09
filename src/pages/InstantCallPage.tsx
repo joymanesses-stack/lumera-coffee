@@ -9,6 +9,7 @@ import {
   type CallMode,
   type CallStatus,
 } from '../lib/calls';
+import { firebaseConfigured } from '../lib/firebase';
 
 export const InstantCallPage: React.FC = () => {
   const [selectedMode, setSelectedMode] = useState<CallMode>('voice');
@@ -56,9 +57,6 @@ export const InstantCallPage: React.FC = () => {
         if (call.status === 'accepted' && joinedCallIdRef.current !== call.id) {
           joinedCallIdRef.current = call.id;
           stopRingtone();
-          streamRef.current?.getTracks().forEach((track) => track.stop());
-          streamRef.current = null;
-          setLocalStream(null);
           const activeStream = streamRef.current;
           if (!activeStream) {
             setCallError('Your microphone or camera stream is unavailable.');
@@ -153,8 +151,14 @@ export const InstantCallPage: React.FC = () => {
     setCallId(null);
     setIsCallConnected(false);
     joinedCallIdRef.current = null;
-    startRingtone();
     setIsCalling(true);
+
+    if (!firebaseConfigured) {
+      setCallError('Firebase is missing from this deployed build. Add all six VITE_FIREBASE_* web-app values in Netlify Site configuration → Environment variables, then redeploy the site.');
+      return;
+    }
+
+    startRingtone();
 
     try {
       const stream = await navigator.mediaDevices.getUserMedia({

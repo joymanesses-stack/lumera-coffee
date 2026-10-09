@@ -27,7 +27,7 @@ export const db = app ? getFirestore(app) : null;
 
 export function requireFirebase() {
   if (!auth || !db) {
-    throw new Error('Firebase is not configured. Add the VITE_FIREBASE_* values to .env.local.');
+    throw new Error('Firebase is not configured in this build. Set the required VITE_FIREBASE_* web-app values in the deployment environment and rebuild the site.');
   }
 
   return { auth, db };
