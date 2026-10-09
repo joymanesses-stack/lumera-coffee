@@ -153,15 +153,9 @@ export const InstantCallPage: React.FC = () => {
     joinedCallIdRef.current = null;
     setIsCalling(true);
 
-    if (!firebaseConfigured) {
-      setCallError('Firebase is missing from this deployed build. Add all six VITE_FIREBASE_* web-app values in Netlify Site configuration → Environment variables, then redeploy the site.');
-      return;
-    }
-
-    startRingtone();
-
+    let stream: MediaStream;
     try {
-      const stream = await navigator.mediaDevices.getUserMedia({
+      stream = await navigator.mediaDevices.getUserMedia({
         video: selectedMode === 'video',
         audio: true,
       });
@@ -171,6 +165,41 @@ export const InstantCallPage: React.FC = () => {
       }
       streamRef.current = stream;
       setLocalStream(stream);
+    } catch (error) {
+      if (requestId === callRequestRef.current) {
+        const reason = error instanceof Error ? error.message : 'Unknown media permission error.';
+        setCallError(`Could not access your ${selectedMode === 'video' ? 'camera and microphone' : 'microphone'}. Check browser permissions. ${reason}`);
+      }
+      return;
+    }
+
+    if (!firebaseConfigured) {
+      if (selectedMode === 'voice') {
+        stream.getTracks().forEach((track) => track.stop());
+        streamRef.current = null;
+      }
+      setCallError(
+        selectedMode === 'video'
+          ? 'Camera preview is active, but live calls are unavailable because Firebase is missing from this build. Add the six VITE_FIREBASE_* web-app values in Netlify → Site configuration → Environment variables, then redeploy.'
+          : 'Live calls are unavailable because Firebase is missing from this build. Add the six VITE_FIREBASE_* web-app values in Netlify → Site configuration → Environment variables, then redeploy.'
+      );
+      return;
+    }
+
+    if (!import.meta.env.VITE_SIGNALING_SERVER_URL) {
+      if (selectedMode === 'voice') {
+        stream.getTracks().forEach((track) => track.stop());
+        streamRef.current = null;
+      }
+      setCallError(
+        selectedMode === 'video'
+          ? 'Camera preview is active, but live calls are unavailable because VITE_SIGNALING_SERVER_URL is missing from this build. Configure it in Netlify and redeploy.'
+          : 'Live calls are unavailable because VITE_SIGNALING_SERVER_URL is missing from this build. Configure it in Netlify and redeploy.'
+      );
+      return;
+    }
+
+    try {
       const newCallId = await createCallRequest(selectedMode);
       if (requestId !== callRequestRef.current) {
         await endCallRequest(newCallId);
@@ -178,14 +207,19 @@ export const InstantCallPage: React.FC = () => {
       }
       setCallId(newCallId);
       setCallStatus('ringing');
+      startRingtone();
     } catch (error) {
       if (requestId === callRequestRef.current) {
-        stopRingtone();
-        streamRef.current?.getTracks().forEach((track) => track.stop());
-        streamRef.current = null;
-        setLocalStream(null);
         const reason = error instanceof Error ? error.message : 'Unknown call setup error.';
-        setCallError(`Could not start the call. Check microphone/camera permissions and Firebase setup. ${reason}`);
+        if (selectedMode === 'voice') {
+          stream.getTracks().forEach((track) => track.stop());
+          streamRef.current = null;
+        }
+        setCallError(
+          selectedMode === 'video'
+            ? `Camera preview is active, but the call request could not be created. Check Firebase Authentication/Firestore configuration. ${reason}`
+            : `The call request could not be created. Check Firebase Authentication/Firestore configuration. ${reason}`
+        );
       }
     }
   };
@@ -378,7 +412,13 @@ export const InstantCallPage: React.FC = () => {
                   {selectedMode === 'voice' ? 'Voice call' : 'Video call'}
                 </div>
                 <h2 id="call-dialog-title" className="mt-2 text-2xl font-bold text-white font-display">
-                  {callStatus === 'declined' ? 'Agent unavailable' : callStatus === 'ended' ? 'Call ended' : 'Ringing Lumera Agent'}
+                  {callStatus === 'declined'
+                    ? 'Agent unavailable'
+                    : callStatus === 'ended'
+                      ? 'Call ended'
+                      : callError
+                        ? selectedMode === 'video' && localStream ? 'Camera preview only' : 'Call not started'
+                        : 'Ringing Lumera Agent'}
                 </h2>
               </div>
               <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-full border border-[#4A3B1C] bg-[#1F1B10] text-[#C5A059]">
@@ -408,9 +448,11 @@ export const InstantCallPage: React.FC = () => {
             )}
 
             <div className="mt-5 flex items-center justify-center gap-2 text-sm font-medium text-[#E5C378]" aria-live="polite">
-              {!isCallConnected && callStatus !== 'ended' && callStatus !== 'declined' && <LoaderCircle className="h-4 w-4 animate-spin" />}
+              {!callError && !isCallConnected && callStatus !== 'ended' && callStatus !== 'declined' && <LoaderCircle className="h-4 w-4 animate-spin" />}
               <span>
-                {isCallConnected
+                {callError
+                  ? 'A live call has not started.'
+                  : isCallConnected
                   ? 'Connected to the Lumera Agent'
                   : callStatus === 'accepted'
                     ? 'Agent picked up — joining the call'
@@ -424,7 +466,11 @@ export const InstantCallPage: React.FC = () => {
               </span>
             </div>
             <p className="mt-3 text-center text-xs leading-relaxed text-[#8E8A80]">
-              {selectedMode === 'video' && localStream ? 'Your camera preview is live on this device while you wait.' : 'You can end the call at any time.'}
+              {selectedMode === 'video' && localStream
+                ? callError
+                  ? 'Your camera preview is working locally. Configure Firebase and the signaling server to connect with an agent.'
+                  : 'Your camera preview is live on this device while you wait.'
+                : 'You can end the call at any time.'}
             </p>
             {ringError && <p role="alert" className="mt-3 text-center text-xs text-amber-300">{ringError}</p>}
             {callError && <p role="alert" className="mt-3 text-center text-xs text-amber-300">{callError}</p>}
