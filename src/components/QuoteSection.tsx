@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+﻿import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { QuoteFormState, CoffeeProduct } from '../types';
 import { COFFEE_PRODUCTS } from '../data/coffeeProducts';
@@ -30,13 +30,13 @@ export const QuoteSection: React.FC<QuoteSectionProps> = ({ initialCoffeeName })
     phone: '',
     country: '',
     businessType: 'Importer',
-    coffeeType: initialCoffeeName || 'Lumera Highland Reserve — Red Bourbon G1',
-    quantityRequired: '1 x 20ft FCL Container (320 bags / 19.2 MT)',
-    incoterm: 'FOB (Free on Board)',
+    coffeeType: initialCoffeeName || COFFEE_PRODUCTS[0].name,
+    quantityRequired: '',
+    incoterm: 'To be discussed',
     destinationPort: '',
-    preferredPackaging: '60 kg Jute Bag with Hermetic GrainPro® Liner',
-    targetShippingMonth: 'Next Available Sailing',
-    requestSamples: true,
+    preferredPackaging: '',
+    targetShippingMonth: '',
+    requestSamples: false,
     message: '',
   });
 
@@ -44,6 +44,7 @@ export const QuoteSection: React.FC<QuoteSectionProps> = ({ initialCoffeeName })
   const [inquiryId, setInquiryId] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [submissionError, setSubmissionError] = useState('');
+  const selectedProduct = COFFEE_PRODUCTS.find((product) => product.name === formData.coffeeType);
 
   useEffect(() => {
     if (initialCoffeeName) {
@@ -79,7 +80,7 @@ export const QuoteSection: React.FC<QuoteSectionProps> = ({ initialCoffeeName })
             Request an Export Quotation
           </h2>
           <p className="text-sm sm:text-base text-[#9F9B90] mt-3 font-light leading-relaxed">
-            Submit your commercial requirements below. Our international trade specialists will generate a formal proforma quotation (FOB/CIF) and coordinate courier delivery of green coffee evaluation samples.
+            Share your product, quantity, packaging preferences and destination. Product details, pricing and delivery terms are confirmed in a formal quotation.
           </p>
         </div>
 
@@ -106,9 +107,9 @@ export const QuoteSection: React.FC<QuoteSectionProps> = ({ initialCoffeeName })
                 <div className="bg-[#0B0D0C] p-5 rounded-xl border border-[#212723] max-w-md mx-auto text-left text-xs space-y-2 text-[#ABA69A]">
                   <p className="text-white font-medium">Next Procurement Steps:</p>
                   <p>1. Our export desk is reviewing your requirements for <strong className="text-white">{formData.coffeeType}</strong> ({formData.quantityRequired}).</p>
-                  <p>2. A formal commercial offer with pricing for <strong className="text-white">{formData.incoterm}</strong> terms will be emailed to <strong className="text-white">{formData.email}</strong> within 24 business hours.</p>
+                  <p>2. The team will review your requirements and follow up at <strong className="text-white">{formData.email}</strong> with a formal quotation.</p>
                   {formData.requestSamples && (
-                    <p className="text-emerald-400">3. Express sample dispatch (300g–500g green coffee) will be scheduled via DHL/FedEx.</p>
+                    <p className="text-emerald-400">3. We will contact you about sample availability and arrangements.</p>
                   )}
                 </div>
 
@@ -222,8 +223,8 @@ export const QuoteSection: React.FC<QuoteSectionProps> = ({ initialCoffeeName })
                       <option value="Importer">Green Coffee Importer</option>
                       <option value="Roaster">Specialty / Commercial Roaster</option>
                       <option value="Distributor">Wholesale Distributor</option>
-                      <option value="Broker">Coffee Broker / Trader</option>
-                      <option value="Private Label / Manufacturer">Private Label / Manufacturer</option>
+                      <option value="Retailer">Retailer</option>
+                      <option value="Hospitality">Hotel, restaurant or coffee shop</option><option value="Other">Other business</option>
                     </select>
                   </div>
                 </div>
@@ -237,7 +238,7 @@ export const QuoteSection: React.FC<QuoteSectionProps> = ({ initialCoffeeName })
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   <div>
                     <label className="block text-xs font-medium text-[#C8C4B8] mb-1.5">
-                      Coffee Lot / Grade of Interest *
+                      Product Type *
                     </label>
                     <select
                       value={formData.coffeeType}
@@ -249,8 +250,7 @@ export const QuoteSection: React.FC<QuoteSectionProps> = ({ initialCoffeeName })
                           {c.name}
                         </option>
                       ))}
-                      <option value="Mixed Container / Multi-Lot Request">Mixed Container / Multi-Lot Request</option>
-                      <option value="Custom Buyer Prep / Screen 18+">Custom Buyer Prep / Screen 18+</option>
+                      <option value="Custom business request">Custom business request</option>
                     </select>
                   </div>
 
@@ -258,17 +258,8 @@ export const QuoteSection: React.FC<QuoteSectionProps> = ({ initialCoffeeName })
                     <label className="block text-xs font-medium text-[#C8C4B8] mb-1.5">
                       Volume Required *
                     </label>
-                    <select
-                      value={formData.quantityRequired}
-                      onChange={(e) => setFormData({ ...formData, quantityRequired: e.target.value })}
-                      className="w-full bg-[#0B0D0C] border border-[#252C27] rounded px-3 py-2.5 text-xs text-white focus:outline-none focus:border-[#C5A059]"
-                    >
-                      <option value="Evaluation Samples Only (1kg – 5kg)">Evaluation Samples Only (1kg – 5kg)</option>
-                      <option value="LCL Trial Lot (10 – 50 bags / 600kg – 3,000kg)">LCL Trial Lot (10 – 50 bags / 600kg – 3,000kg)</option>
-                      <option value="1 x 20ft FCL Container (320 bags / 19.2 MT)">1 x 20ft FCL Container (320 bags / 19.2 MT)</option>
-                      <option value="2 to 5 x 20ft FCL Containers (Season Booking)">2 to 5 x 20ft FCL Containers (Season Booking)</option>
-                      <option value="Annual Supply Contract (Over 100 MT)">Annual Supply Contract (Over 100 MT)</option>
-                    </select>
+                    <input type="text" required placeholder="e.g. 500 kg or 2 metric tons" value={formData.quantityRequired} onChange={(e) => setFormData({ ...formData, quantityRequired: e.target.value })} className="w-full bg-[#0B0D0C] border border-[#252C27] rounded px-3 py-2.5 text-xs text-white placeholder-[#5C5A53] focus:outline-none focus:border-[#C5A059]" />
+                    <p className="mt-1.5 text-[11px] leading-relaxed text-[#C9C3B5]">{selectedProduct ? `Minimum order: ${selectedProduct.moq}.` : 'Minimum order depends on the selected product; please ask us to confirm.'}</p>
                   </div>
 
                   <div>
@@ -280,10 +271,10 @@ export const QuoteSection: React.FC<QuoteSectionProps> = ({ initialCoffeeName })
                       onChange={(e) => setFormData({ ...formData, incoterm: e.target.value as any })}
                       className="w-full bg-[#0B0D0C] border border-[#252C27] rounded px-3 py-2.5 text-xs text-white focus:outline-none focus:border-[#C5A059]"
                     >
-                      <option value="FOB (Free on Board)">FOB (Free on Board Origin Port)</option>
+                      <option value="To be discussed">To be discussed</option><option value="FOB (Free on Board)">FOB (Free on Board Origin Port)</option>
                       <option value="CIF (Cost, Insurance & Freight)">CIF (Cost, Insurance & Freight Destination)</option>
                       <option value="CFR (Cost and Freight)">CFR (Cost and Freight)</option>
-                      <option value="Sample Lot Request">Sample Lot Request (Air Courier)</option>
+                      <option value="Sample Lot Request">Sample request</option>
                     </select>
                   </div>
 
@@ -308,16 +299,7 @@ export const QuoteSection: React.FC<QuoteSectionProps> = ({ initialCoffeeName })
                     <label className="block text-xs font-medium text-[#C8C4B8] mb-1.5">
                       Preferred Export Packaging
                     </label>
-                    <select
-                      value={formData.preferredPackaging}
-                      onChange={(e) => setFormData({ ...formData, preferredPackaging: e.target.value })}
-                      className="w-full bg-[#0B0D0C] border border-[#252C27] rounded px-3 py-2.5 text-xs text-white focus:outline-none focus:border-[#C5A059]"
-                    >
-                      <option value="60 kg Jute Bag with Hermetic GrainPro® Liner">60 kg Jute Bag with Hermetic GrainPro® Liner (Recommended)</option>
-                      <option value="Standard 60 kg Jute Bag without Liner">Standard 60 kg Jute Bag without Liner</option>
-                      <option value="30 kg Vacuum Carton Packs (Specialty Lots)">30 kg Vacuum Carton Packs (Specialty Lots)</option>
-                      <option value="Bulk Container Liner (Big Bags 1MT)">Bulk Container Liner (Big Bags 1MT)</option>
-                    </select>
+                    <input type="text" placeholder="To be agreed based on your order" value={formData.preferredPackaging} onChange={(e) => setFormData({ ...formData, preferredPackaging: e.target.value })} className="w-full bg-[#0B0D0C] border border-[#252C27] rounded px-3 py-2.5 text-xs text-white placeholder-[#5C5A53] focus:outline-none focus:border-[#C5A059]" />
                   </div>
 
                   <div>
@@ -343,7 +325,7 @@ export const QuoteSection: React.FC<QuoteSectionProps> = ({ initialCoffeeName })
                       className="w-4 h-4 rounded text-[#C5A059] bg-[#0B0D0C] border-[#2B332E] focus:ring-[#C5A059]"
                     />
                     <span className="text-xs text-[#E5C378] font-medium">
-                      Yes, dispatch 300g–500g green evaluation samples via express courier (DHL/FedEx)
+                      I would like to ask about a sample
                     </span>
                   </label>
                 </div>
@@ -385,7 +367,7 @@ export const QuoteSection: React.FC<QuoteSectionProps> = ({ initialCoffeeName })
                 Fast, Professional Trade Response
               </h4>
               <p className="text-[#99958C] font-light leading-relaxed">
-                International buyers receive a formal response within 24 to 48 business hours, complete with FOB / CIF indicative pricing, current warehouse moisture readings, and air courier dispatch tracking.
+                Share your product, quantity, preferred roast, packaging, destination and shipping terms. Availability, specifications, pricing and delivery costs are confirmed in a formal quotation.
               </p>
 
               <div className="pt-2 space-y-2.5 border-t border-[#1C221D] text-[#BFBBB0]">
@@ -399,7 +381,7 @@ export const QuoteSection: React.FC<QuoteSectionProps> = ({ initialCoffeeName })
                 </div>
                 <div className="flex items-center gap-2">
                   <CheckCircle2 className="w-3.5 h-3.5 text-emerald-400 shrink-0" />
-                  <span>Full ICO & Phytosanitary Compliance</span>
+                  <span>Export documentation confirmed per order</span>
                 </div>
               </div>
             </div>
@@ -417,8 +399,8 @@ export const QuoteSection: React.FC<QuoteSectionProps> = ({ initialCoffeeName })
                   </div>
                   <div>
                     <span className="text-[#7F7B71] block text-[10px] uppercase">Export Inquiries</span>
-                    <a href="mailto:export@lumeracoffee.com" className="text-white hover:text-[#C5A059] transition-colors font-medium">
-                      export@lumeracoffee.com
+                    <a href="mailto:lumeracampanyltd@gmail.com" className="text-white hover:text-[#C5A059] transition-colors font-medium">
+                      lumeracampanyltd@gmail.com
                     </a>
                   </div>
                 </div>
@@ -456,3 +438,7 @@ export const QuoteSection: React.FC<QuoteSectionProps> = ({ initialCoffeeName })
     </section>
   );
 };
+
+
+
+

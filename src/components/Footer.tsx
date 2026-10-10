@@ -1,4 +1,4 @@
-import React from 'react';
+﻿import React from 'react';
 import { Link } from 'react-router-dom';
 import { Logo } from './Logo';
 import { 
@@ -31,10 +31,10 @@ export const Footer: React.FC<FooterProps> = ({
               International Trade Partnerships
             </span>
             <h3 className="text-2xl sm:text-3xl font-bold text-white font-display">
-              Ready to Source Premium Origin Green Coffee?
+              Looking for Rwandan Arabica Coffee?
             </h3>
             <p className="text-xs text-[#8E8B81] mt-1 max-w-xl">
-              Lock in your seasonal allocations, request courier evaluation samples, or submit your technical specifications to our export desk.
+              Contact Lumera for product details, a tailored business quote, samples or international trade inquiries.
             </p>
           </div>
 
@@ -61,27 +61,16 @@ export const Footer: React.FC<FooterProps> = ({
           {/* Brand Column */}
           <div className="lg:col-span-2 space-y-4">
             <Link to="/">
-              <Logo size="md" />
+              <Logo size="lg" />
             </Link>
             <p className="text-xs text-[#A8A49A] leading-relaxed max-w-sm mt-3 font-light">
-              Lumera Coffee is an international green coffee exporter and supplier. We source from verified highland washing stations and deliver export-ready lots with guaranteed consistency, traceability, and certified quality.
+              Lumera Company Ltd is a Rwandan coffee brand offering green Arabica beans and roasted coffee from Karongi and Nyamasheke.
             </p>
 
             <div className="pt-2 text-xs text-[#C5A059] font-medium tracking-wider uppercase">
               Pure Origin. Rich Flavor. True Quality.
             </div>
 
-            <div className="flex flex-wrap gap-2 pt-2">
-              <span className="px-2.5 py-1 rounded bg-[#101412] border border-[#212A23] text-[10.5px] text-[#8F8B81]">
-                ICO Registered Exporter
-              </span>
-              <span className="px-2.5 py-1 rounded bg-[#101412] border border-[#212A23] text-[10.5px] text-[#8F8B81]">
-                SCA Cupping Standards
-              </span>
-              <span className="px-2.5 py-1 rounded bg-[#101412] border border-[#212A23] text-[10.5px] text-[#8F8B81]">
-                GrainPro® Hermetic Protection
-              </span>
-            </div>
           </div>
 
           {/* Dedicated Page Navigation */}
@@ -124,22 +113,13 @@ export const Footer: React.FC<FooterProps> = ({
             </h4>
             <ul className="space-y-2 text-xs">
               <li>
-                <Link to="/coffee" className="hover:text-[#C5A059] transition-colors">Specialty Arabica G1 (87+)</Link>
+                <Link to="/coffee" className="hover:text-[#C5A059] transition-colors">Green Arabica Coffee</Link>
               </li>
               <li>
-                <Link to="/coffee" className="hover:text-[#C5A059] transition-colors">Fully Washed Bourbon</Link>
+                <Link to="/coffee" className="hover:text-[#C5A059] transition-colors">Roasted Whole Beans</Link>
               </li>
               <li>
-                <Link to="/coffee" className="hover:text-[#C5A059] transition-colors">Sun-Dried Natural Lots</Link>
-              </li>
-              <li>
-                <Link to="/coffee" className="hover:text-[#C5A059] transition-colors">Honey Process Micro-Lots</Link>
-              </li>
-              <li>
-                <Link to="/coffee" className="hover:text-[#C5A059] transition-colors">Fine Highland Robusta (Screen 18)</Link>
-              </li>
-              <li>
-                <Link to="/coffee" className="hover:text-[#C5A059] transition-colors">European Prep (FAQ Export)</Link>
+                <Link to="/coffee" className="hover:text-[#C5A059] transition-colors">Roasted Ground Coffee</Link>
               </li>
             </ul>
           </div>
@@ -153,15 +133,15 @@ export const Footer: React.FC<FooterProps> = ({
               <div className="flex items-start gap-2">
                 <MapPin className="w-4 h-4 text-[#C5A059] shrink-0 mt-0.5" />
                 <span>
-                  Highland Trade Corridors<br />
-                  Central & East African Origin Desk
+                  Rwanda<br />
+                  Coffee origin: Karongi and Nyamasheke
                 </span>
               </div>
 
               <div className="flex items-center gap-2">
                 <Mail className="w-4 h-4 text-[#C5A059] shrink-0" />
-                <a href="mailto:export@lumeracoffee.com" className="text-white hover:text-[#C5A059] transition-colors">
-                  export@lumeracoffee.com
+                <a href="mailto:lumeracampanyltd@gmail.com" className="text-white hover:text-[#C5A059] transition-colors">
+                  lumeracampanyltd@gmail.com
                 </a>
               </div>
 
@@ -172,9 +152,7 @@ export const Footer: React.FC<FooterProps> = ({
                 </a>
               </div>
 
-              <div className="pt-2 text-[11px] text-[#78756D]">
-                Trade Hours: Mon – Fri 08:00 – 18:00 (CAT / GMT+2)
-              </div>
+              <div className="flex flex-col items-start gap-2 pt-2 text-[11px]"><a href="https://lumera-coffee.com" target="_blank" rel="noreferrer" className="text-white hover:text-[#C5A059]">lumera-coffee.com</a><a href="https://instagram.com/lumeracoffee2026" target="_blank" rel="noreferrer" className="text-white hover:text-[#C5A059]">Instagram: @lumeracoffee2026</a></div>
             </div>
           </div>
         </div>
@@ -184,12 +162,13 @@ export const Footer: React.FC<FooterProps> = ({
       <div className="border-t border-[#161D18] py-6 px-4 sm:px-6 lg:px-8">
         <div className="max-w-7xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-4 text-[11px] text-[#6E6B63]">
           <div>
-            © {new Date().getFullYear()} Lumera Coffee Ltd. All rights reserved. International Coffee Exporters.
+            <Link to="/company-document" className="hover:text-[#C5A059] transition-colors" aria-label="Open the private Lumera Company Ltd document">
+              © {new Date().getFullYear()} Lumera Company Ltd.
+            </Link>{' '}All rights reserved.
           </div>
 
           <div className="flex items-center gap-6">
-            <span>Incoterms® 2020 Compliant</span>
-            <span>GrainPro® Hermetic Packaging</span>
+            <span>Rwandan Arabica Coffee</span>
             <button
               onClick={scrollToTop}
               className="flex items-center gap-1 text-[#C5A059] hover:text-white transition-colors cursor-pointer"
@@ -203,3 +182,4 @@ export const Footer: React.FC<FooterProps> = ({
     </footer>
   );
 };
+

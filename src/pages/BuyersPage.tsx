@@ -1,4 +1,4 @@
-import React from 'react';
+﻿import React from 'react';
 import { Link } from 'react-router-dom';
 import { 
   FileText, 
@@ -15,67 +15,19 @@ import {
 
 export const BuyersPage: React.FC = () => {
   const steps = [
-    {
-      num: '01',
-      title: 'Tell Us What You Need',
-      desc: 'Submit your inquiry specifying desired coffee type (Arabica/Robusta), grade, volume (FCL or LCL sample lots), preferred packaging, and destination port.',
-      icon: FileText,
-      badge: 'Step 1: Inquiry',
-    },
-    {
-      num: '02',
-      title: 'We Match Requirements',
-      desc: 'Our export desk matches your exact requirements against active harvest lots, curating commercial offers with transparent FOB or CIF pricing.',
-      icon: Search,
-      badge: 'Step 2: Quotation',
-    },
-    {
-      num: '03',
-      title: 'Sample & Quality Evaluation',
-      desc: 'We dispatch 300g–500g green coffee Offer Samples (OS) via express courier (DHL/FedEx) to your roasting laboratory for cupping and moisture verification.',
-      icon: Coffee,
-      badge: 'Step 3: Cupping',
-    },
-    {
-      num: '04',
-      title: 'Confirm Specifications',
-      desc: 'Upon sample approval, we confirm technical contracts: screen tolerances, moisture limits (<11.5%), payment terms (L/C, CAD, TT), and shipping schedules.',
-      icon: CheckCircle,
-      badge: 'Step 4: Contract',
-    },
-    {
-      num: '05',
-      title: 'Milling & Pre-Shipment QC',
-      desc: 'Green coffee is milled, optical-color sorted, hermetically sealed in GrainPro liners, and Pre-Shipment Samples (PSS) are approved prior to container loading.',
-      icon: FileCheck2,
-      badge: 'Step 5: Verification',
-    },
-    {
-      num: '06',
-      title: 'Container Shipment & Docs',
-      desc: 'Ocean container stuffed, fumigated, and dispatched with complete export documentation: ICO Certificate of Origin, Phytosanitary, Bill of Lading, and QC certs.',
-      icon: Ship,
-      badge: 'Step 6: Delivery',
-    },
+    { num: '01', title: 'Send an inquiry', desc: 'Tell us the product type and quantity you need, your packaging preferences and destination.', icon: FileText, badge: 'Step 1: Inquiry' },
+    { num: '02', title: 'Review available details', desc: 'We confirm current stock, product specifications and the details available for your selected coffee batch.', icon: Search, badge: 'Step 2: Product details' },
+    { num: '03', title: 'Discuss samples', desc: 'If you would like a sample, include that in your inquiry. The team can confirm availability and arrangements.', icon: Coffee, badge: 'Step 3: Samples' },
+    { num: '04', title: 'Receive a quotation', desc: 'Lumera confirms pricing, availability, specifications, packaging and delivery terms in a formal quotation.', icon: CheckCircle, badge: 'Step 4: Quotation' },
+    { num: '05', title: 'Agree on the order', desc: 'Both parties agree on product, quantity, price, payment terms and delivery instructions.', icon: FileCheck2, badge: 'Step 5: Order' },
+    { num: '06', title: 'Prepare shipping details', desc: 'Coffee is prepared to the agreed terms. Shipping methods and required documents are finalized before dispatch.', icon: Ship, badge: 'Step 6: Delivery' },
   ];
 
   const faqs = [
-    {
-      q: 'What is the standard Minimum Order Quantity (MOQ)?',
-      a: 'Our standard export volume is 1 x 20ft FCL (320 bags / 19.2 Metric Tons). However, for specialty micro-lots and initial buyer trials, we support LCL palletized shipments starting from 20 bags (1.2 MT) and express air courier evaluation samples (300g–5kg).',
-    },
-    {
-      q: 'How do you handle green coffee sample evaluations?',
-      a: 'We courier 300g–500g green coffee Offer Samples (OS) worldwide via DHL Express. Samples include full lot tracking sheets, moisture analysis, screen grading, and cupping score sheets.',
-    },
-    {
-      q: 'What payment terms do you accept?',
-      a: 'For first-time international buyers, we typically work with Irrevocable Letters of Credit (L/C at sight) from first-class international banks, Cash Against Documents (CAD), or Telegraphic Transfer (TT with deposit and balance upon Bill of Lading copy).',
-    },
-    {
-      q: 'Can you supply custom buyer bagging and stenciling?',
-      a: 'Yes. We provide custom jute bag markings, buyer logo stenciling, ICO destination country numbering, and specialized vacuum-pack cartons according to buyer specifications.',
-    },
+    { q: 'What is the minimum order quantity?', a: 'The minimum order quantity depends on the product and order. Share the quantity you need so Lumera can confirm current options.' },
+    { q: 'Can I request a sample?', a: 'Tell us which product you would like to sample. Availability, specifications and delivery arrangements will be confirmed by the team.' },
+    { q: 'How are payment terms decided?', a: 'Payment terms are discussed and mutually agreed as part of the order confirmation.' },
+    { q: 'Can packaging be customized?', a: 'Packaging is agreed based on order volume, buyer requirements and available packaging options.' },
   ];
 
   return (
@@ -85,13 +37,13 @@ export const BuyersPage: React.FC = () => {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
           <div className="inline-flex items-center gap-2 text-xs font-semibold uppercase tracking-[0.28em] text-[#C5A059] mb-3">
             <Sparkles className="w-3.5 h-3.5" />
-            <span>Structured Procurement Protocol</span>
+            <span>International trade inquiries</span>
           </div>
           <h1 className="text-4xl sm:text-6xl font-bold text-white font-display">
             For International Buyers
           </h1>
           <p className="text-sm sm:text-base text-[#A8A498] max-w-2xl mx-auto mt-4 font-light leading-relaxed">
-            Whether you are a roaster, importer, distributor, or coffee business, Lumera Coffee can work with you to identify coffee that matches your requirements.
+            Lumera welcomes inquiries from importers, distributors, roasters, retailers, coffee shops, hotels and restaurants.
           </p>
         </div>
       </section>
@@ -101,13 +53,13 @@ export const BuyersPage: React.FC = () => {
         {/* Intro */}
         <div className="text-center max-w-3xl mx-auto">
           <span className="text-xs uppercase tracking-widest text-[#C5A059] font-bold block mb-2">
-            The 6-Step Procurement Journey
+            The ordering process
           </span>
           <h2 className="text-3xl font-bold text-white font-display">
             Looking for a Reliable Coffee Supplier?
           </h2>
           <p className="text-xs sm:text-sm text-[#A8A498] mt-3 font-light leading-relaxed">
-            Our trade desk follows a rigorous, transparent export process designed to protect your capital and ensure that the green coffee in your container matches the sensory profile of your approved sample.
+            Product information, pricing, packaging, delivery and payment terms are confirmed with you before an order is prepared.
           </p>
         </div>
 
@@ -145,7 +97,7 @@ export const BuyersPage: React.FC = () => {
 
                 <div className="mt-6 pt-3 border-t border-[#1C221D] flex items-center justify-between text-[11px] text-[#7A766D]">
                   <span>Stage {idx + 1} of 6</span>
-                  <span className="text-[#C5A059] font-medium">Standard Protocol →</span>
+                  <span className="text-[#C5A059] font-medium">Next step →</span>
                 </div>
               </div>
             );
@@ -184,7 +136,7 @@ export const BuyersPage: React.FC = () => {
             Ready to Begin Step 1?
           </h3>
           <p className="text-xs sm:text-sm text-[#8F8B81] max-w-lg mx-auto mb-6">
-            Submit your coffee requirements to receive an indicative FOB/CIF commercial quotation and schedule sample delivery.
+            Send us your product, quantity, packaging and destination requirements for a formal quotation.
           </p>
           <Link
             to="/contact"
@@ -198,3 +150,4 @@ export const BuyersPage: React.FC = () => {
     </div>
   );
 };
+

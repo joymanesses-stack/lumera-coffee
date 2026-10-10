@@ -16,7 +16,7 @@ export const ContactPage: React.FC = () => {
             Request an Export Quotation
           </h1>
           <p className="text-sm sm:text-base text-[#A8A498] max-w-2xl mx-auto mt-4 font-light leading-relaxed">
-            Connect with our international export specialists to receive proforma FOB/CIF quotes, reserve crop allocations, or request courier evaluation samples.
+            Tell us the coffee format, quantity, packaging, destination and shipping terms you need. We will confirm available details and pricing in a formal quotation.
           </p>
         </div>
       </section>

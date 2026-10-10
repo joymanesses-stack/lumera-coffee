@@ -27,7 +27,7 @@ export const Hero: React.FC<HeroProps> = ({
         <div 
           className="absolute inset-0 bg-cover bg-center opacity-30 mix-blend-luminosity scale-105 transform transition-transform duration-10000 hover:scale-100"
           style={{
-            backgroundImage: `url('https://images.unsplash.com/photo-1518832553480-cd0e625ed3e6?auto=format&fit=crop&w=2000&q=85')`,
+            backgroundImage: `url('/images/lumera/rwanda-highlands.jpeg')`,
           }}
         />
         {/* Layered vignette & gold-emerald radiance */}
@@ -46,7 +46,7 @@ export const Hero: React.FC<HeroProps> = ({
           </span>
           <span className="text-[#4E564F]">|</span>
           <span className="text-[10.5px] tracking-wider uppercase text-[#96B89E] font-medium hidden md:inline">
-            FOB & CIF Export Ready
+            International trade inquiries
           </span>
         </div>
 
@@ -64,10 +64,10 @@ export const Hero: React.FC<HeroProps> = ({
         {/* Brand Tagline & Positioning Copy */}
         <div className="max-w-3xl mx-auto mb-10 space-y-4">
           <p className="text-sm sm:text-base font-semibold tracking-[0.2em] uppercase text-[#D4AF37]/90 font-sans">
-            PURE ORIGIN. RICH FLAVOR. TRUE QUALITY.
+            EXCEPTIONAL COFFEE. AUTHENTIC RWANDAN ORIGIN.
           </p>
           <p className="text-base sm:text-lg text-[#BFBBB0] leading-relaxed font-light">
-            We source and export carefully selected green coffees from high-altitude volcanic terroirs, connecting exceptional origins with discerning roasters, green coffee importers, and international distributors worldwide.
+            Lumera Company Ltd offers Rwandan Arabica green coffee and roasted coffee from Karongi and Nyamasheke. Product details, pricing and delivery terms are confirmed for each inquiry.
           </p>
         </div>
 
@@ -111,10 +111,10 @@ export const Hero: React.FC<HeroProps> = ({
                 <span className="text-[11px] uppercase tracking-wider font-semibold text-[#8DAA98]">Origin</span>
               </div>
               <div className="text-xl sm:text-2xl font-bold text-white font-display">
-                1,750m – 2,200m
+                Rwanda
               </div>
               <p className="text-[12px] text-[#8C8980] mt-1">
-                High-altitude volcanic highlands & micro-climates
+                Rwandan Arabica coffee
               </p>
             </div>
 
@@ -125,10 +125,10 @@ export const Hero: React.FC<HeroProps> = ({
                 <span className="text-[11px] uppercase tracking-wider font-semibold text-[#8DAA98]">Quality</span>
               </div>
               <div className="text-xl sm:text-2xl font-bold text-white font-display">
-                Grade 1 & Specialty
+                Green & roasted coffee
               </div>
               <p className="text-[12px] text-[#8C8980] mt-1">
-                SCA 84.5 – 88.0+ certified cupping score standards
+                Whole beans and ground coffee formats
               </p>
             </div>
 
@@ -139,10 +139,10 @@ export const Hero: React.FC<HeroProps> = ({
                 <span className="text-[11px] uppercase tracking-wider font-semibold text-[#8DAA98]">Traceability</span>
               </div>
               <div className="text-xl sm:text-2xl font-bold text-white font-display">
-                100% Station Lot
+                Karongi & Nyamasheke
               </div>
               <p className="text-[12px] text-[#8C8980] mt-1">
-                Direct washing station, harvest date & batch tracking
+                Coffee-growing districts in Rwanda
               </p>
             </div>
 
@@ -153,10 +153,10 @@ export const Hero: React.FC<HeroProps> = ({
                 <span className="text-[11px] uppercase tracking-wider font-semibold text-[#8DAA98]">Global Supply</span>
               </div>
               <div className="text-xl sm:text-2xl font-bold text-white font-display">
-                FCL & LCL Ready
+                Details by inquiry
               </div>
               <p className="text-[12px] text-[#8C8980] mt-1">
-                Hermetic GrainPro + 60kg jute bag ocean freight
+                Packaging, order quantity and shipping terms agreed per order
               </p>
             </div>
           </div>

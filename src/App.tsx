@@ -11,9 +11,11 @@ import { QualityPage } from './pages/QualityPage';
 import { ExportPage } from './pages/ExportPage';
 import { BuyersPage } from './pages/BuyersPage';
 import { ContactPage } from './pages/ContactPage';
+import { CompanyDocumentPage } from './pages/CompanyDocumentPage';
 import { CoffeeSpecModal } from './components/CoffeeSpecModal';
 import { QuoteModal } from './components/QuoteModal';
 import { DownloadSheetModal } from './components/DownloadSheetModal';
+import { LumeraChatbot } from './components/LumeraChatbot';
 import { CoffeeProduct } from './types';
 import { Phone } from 'lucide-react';
 
@@ -78,6 +80,7 @@ export function App() {
             <Route path="/export" element={<ExportPage />} />
             <Route path="/buyers" element={<BuyersPage />} />
             <Route path="/contact" element={<ContactPage />} />
+            <Route path="/company-document" element={<CompanyDocumentPage />} />
             <Route
               path="/instant-call"
               element={
@@ -136,15 +139,13 @@ export function App() {
           href="https://wa.me/250722415434"
           target="_blank"
           rel="noreferrer"
-          className="fixed bottom-6 right-6 z-40 bg-[#25D366] hover:bg-[#20ba5a] text-white p-3.5 rounded-full shadow-2xl shadow-black/80 flex items-center justify-center transition-transform hover:scale-110 group cursor-pointer border border-white/20"
+          className="fixed bottom-6 right-6 z-40 bg-[#25D366] hover:bg-[#20ba5a] text-white w-14 h-14 rounded-full shadow-xl shadow-black/25 flex items-center justify-center cursor-pointer border border-white/30"
           aria-label="Chat with Export Desk on WhatsApp"
           title="Direct WhatsApp with Export Operations Desk"
         >
           <Phone className="w-5 h-5 fill-current" />
-          <span className="max-w-0 overflow-hidden whitespace-nowrap group-hover:max-w-xs transition-all duration-300 text-xs font-bold pl-0 group-hover:pl-2">
-            Export WhatsApp
-          </span>
         </a>
+        <LumeraChatbot />
       </div>
     </BrowserRouter>
   );

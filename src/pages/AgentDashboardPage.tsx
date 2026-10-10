@@ -7,6 +7,7 @@ import {
 } from 'firebase/auth';
 import {
   collection,
+  getDoc,
   limit,
   onSnapshot,
   orderBy,
@@ -92,8 +93,12 @@ export const AgentDashboardPage: React.FC = () => {
       setCheckingAgentAccess(Boolean(currentUser));
       if (currentUser) {
         try {
-          const token = await currentUser.getIdTokenResult(true);
-          setIsAgent(token.claims.agent === true);
+          if (!db) throw new Error('Firestore is not configured.');
+          const memberships = await Promise.all([
+            getDoc(doc(db, 'agent', currentUser.uid)),
+            getDoc(doc(db, 'agents', currentUser.uid)),
+          ]);
+          setIsAgent(memberships.some((membership) => membership.exists() && membership.data().active === true));
         } catch {
           setError('Could not verify agent access. Please sign in again.');
         } finally {
@@ -270,7 +275,7 @@ export const AgentDashboardPage: React.FC = () => {
           <AlertCircle className="mb-4 h-8 w-8 text-[#C5A059]" />
           <h1 className="text-2xl font-bold text-white font-display">Set up Firebase to open the agent desk</h1>
           <p className="mt-3 text-sm leading-relaxed text-[#A8A498]">
-            Add your Firebase web-app values to a local <code>.env.local</code> file using <code>.env.example</code> as the template, then enable Email/Password sign-in and Firestore.
+            Add the six Firebase web-app values from <code>.env.example</code> to your deployment environment and rebuild the site. Enable Email/Password sign-in and Firestore in the same Firebase project.
           </p>
         </div>
       </main>
@@ -339,8 +344,13 @@ export const AgentDashboardPage: React.FC = () => {
           <p className="mt-3 text-sm leading-relaxed text-[#A8A498]">
             {isAnonymousAccount
               ? 'This browser was previously signed in anonymously to place a customer call. Sign out of that session, then sign in with your staff email and password.'
-              : `Firebase is connected, but ${user.email || 'this account'} does not have the required agent permission. Grant this account the custom claim "agent: true" using the command in BACKEND_SETUP.md, then sign out and back in.`}
+              : `Firebase is connected, but ${user.email || 'this account'} does not have an active agent membership. In the Firebase Console for this project, create agent/${user.uid} with the boolean field active set to true, then refresh this page.`}
           </p>
+          {!isAnonymousAccount && (
+            <p className="mt-3 break-all rounded bg-[#0B0D0C] p-3 text-xs text-[#CFC8B8]">
+              Firebase Authentication UID: <code>{user.uid}</code>
+            </p>
+          )}
           <button
             onClick={() => void handleSignOut()}
             className="mt-6 rounded bg-[#C5A059] px-5 py-2.5 text-xs font-bold uppercase tracking-wider text-[#111412]"

@@ -1,4 +1,3 @@
-import { io } from 'socket.io-client';
 import {
   addDoc,
   collection,
@@ -6,6 +5,7 @@ import {
   getDoc,
   onSnapshot,
   serverTimestamp,
+  setDoc,
   updateDoc,
 } from 'firebase/firestore';
 import { signInAnonymously } from 'firebase/auth';
@@ -77,20 +77,23 @@ export async function connectWebRTCCall(
   const user = auth.currentUser;
   if (!user) throw new Error('Sign in is required before joining a call.');
 
-  const serverUrl = import.meta.env.VITE_SIGNALING_SERVER_URL;
-  if (!serverUrl) throw new Error('Add VITE_SIGNALING_SERVER_URL to .env.local and start the signaling server.');
-
-  const snapshot = await getDoc(doc(db, 'calls', callId));
+  const callRef = doc(db, 'calls', callId);
+  const snapshot = await getDoc(callRef);
   if (!snapshot.exists() || snapshot.data().status !== 'accepted') {
     throw new Error('The accepted call request could not be found.');
   }
 
-  const idToken = await user.getIdToken();
-  const socket = io(serverUrl, { auth: { token: idToken, callId }, transports: ['websocket', 'polling'] });
   const peer = new RTCPeerConnection();
   const remoteStream = new MediaStream();
   const pendingCandidates: RTCIceCandidateInit[] = [];
   let hasRemoteDescription = false;
+  let closed = false;
+  const signaling = collection(callRef, 'signaling');
+  const ownCandidates = collection(signaling, role === 'caller' ? 'callerCandidates' : 'agentCandidates');
+  const remoteCandidates = collection(signaling, role === 'caller' ? 'agentCandidates' : 'callerCandidates');
+  const unsubscribers: Array<() => void> = [];
+  const iceServers: RTCIceServer[] = [{ urls: 'stun:stun.l.google.com:19302' }];
+  peer.setConfiguration({ iceServers });
   const mediaElement = document.createElement(mode === 'video' ? 'video' : 'audio');
   mediaElement.autoplay = true;
   if (mediaElement instanceof HTMLVideoElement) {
@@ -120,15 +123,22 @@ export async function connectWebRTCCall(
   peer.onconnectionstatechange = () => {
     if (peer.connectionState === 'connected') onConnected();
     if (peer.connectionState === 'failed' || peer.connectionState === 'disconnected') {
-      onError(`Call connection ${peer.connectionState}. Check network access and TURN server configuration.`);
+      onError(`Call connection ${peer.connectionState}. Check network access. Some restricted networks require a TURN relay.`);
     }
   };
   peer.onicecandidate = (event) => {
-    if (event.candidate) socket.emit('ice-candidate', { candidate: event.candidate.toJSON() });
+    if (!event.candidate || closed) return;
+    void addDoc(ownCandidates, {
+      candidate: event.candidate.toJSON(),
+      createdAt: serverTimestamp(),
+    }).catch((error: unknown) => {
+      onError(error instanceof Error ? `Could not share network candidate: ${error.message}` : 'Could not share network candidate.');
+    });
   };
 
   const close = async () => {
-    socket.disconnect();
+    closed = true;
+    unsubscribers.forEach((unsubscribe) => unsubscribe());
     peer.close();
     localStream.getTracks().forEach((track) => track.stop());
     mediaElement.srcObject = null;
@@ -136,62 +146,72 @@ export async function connectWebRTCCall(
     remoteContainer?.replaceChildren();
   };
 
-  socket.on('connect_error', (error) => onError(`Call signaling failed: ${error.message}`));
-  socket.on('call-error', ({ message }: { message: string }) => onError(message));
-  socket.on('peer-left', () => onError('The other participant left the call.'));
-  socket.on('ice-server-config', (servers: RTCIceServer[]) => {
-    peer.setConfiguration({ iceServers: servers });
-  });
-  socket.on('ice-candidate', async ({ candidate }: { candidate: RTCIceCandidateInit }) => {
+  const applyCandidate = async (candidate: RTCIceCandidateInit) => {
     try {
       if (!hasRemoteDescription) pendingCandidates.push(candidate);
       else await peer.addIceCandidate(candidate);
     } catch (error) {
       onError(error instanceof Error ? `Could not add network candidate: ${error.message}` : 'Could not add network candidate.');
     }
-  });
-  socket.on('offer', async ({ description }: { description: RTCSessionDescriptionInit }) => {
-    try {
-      await peer.setRemoteDescription(description);
-      hasRemoteDescription = true;
-      await Promise.all(pendingCandidates.splice(0).map((candidate) => peer.addIceCandidate(candidate)));
-      const answer = await peer.createAnswer();
-      await peer.setLocalDescription(answer);
-      socket.emit('answer', { description: peer.localDescription?.toJSON() });
-    } catch (error) {
-      onError(error instanceof Error ? `Could not answer the call: ${error.message}` : 'Could not answer the call.');
-    }
-  });
-  socket.on('answer', async ({ description }: { description: RTCSessionDescriptionInit }) => {
-    try {
-      await peer.setRemoteDescription(description);
-      hasRemoteDescription = true;
-      await Promise.all(pendingCandidates.splice(0).map((candidate) => peer.addIceCandidate(candidate)));
-    } catch (error) {
-      onError(error instanceof Error ? `Could not connect the call: ${error.message}` : 'Could not connect the call.');
-    }
-  });
-  socket.on('peer-joined', async ({ role: peerRole }: { role: CallRole }) => {
-    if (role !== 'agent' || peerRole !== 'caller' || peer.signalingState !== 'stable') return;
+  };
+  unsubscribers.push(onSnapshot(remoteCandidates, (changes) => {
+    changes.docChanges().forEach((change) => {
+      if (change.type === 'added') {
+        void applyCandidate(change.doc.data().candidate as RTCIceCandidateInit);
+      }
+    });
+  }, (error) => onError(`Call signaling failed: ${error.message}`)));
+
+  const applyPendingCandidates = async () => {
+    hasRemoteDescription = true;
+    await Promise.all(pendingCandidates.splice(0).map((candidate) => peer.addIceCandidate(candidate)));
+  };
+  const answerRef = doc(signaling, 'answer');
+  const offerRef = doc(signaling, 'offer');
+
+  if (role === 'caller') {
+    unsubscribers.push(onSnapshot(offerRef, (offerSnapshot) => {
+      if (!offerSnapshot.exists() || peer.signalingState !== 'stable') return;
+      void (async () => {
+        try {
+          const description = offerSnapshot.data().description as RTCSessionDescriptionInit;
+          await peer.setRemoteDescription(description);
+          await applyPendingCandidates();
+          const answer = await peer.createAnswer();
+          await peer.setLocalDescription(answer);
+          await setDoc(answerRef, {
+            description: peer.localDescription?.toJSON(),
+            createdAt: serverTimestamp(),
+          });
+        } catch (error) {
+          onError(error instanceof Error ? `Could not answer the call: ${error.message}` : 'Could not answer the call.');
+        }
+      })();
+    }, (error) => onError(`Call signaling failed: ${error.message}`)));
+  } else {
+    unsubscribers.push(onSnapshot(answerRef, (answerSnapshot) => {
+      if (!answerSnapshot.exists() || peer.signalingState !== 'have-local-offer') return;
+      void (async () => {
+        try {
+          await peer.setRemoteDescription(answerSnapshot.data().description as RTCSessionDescriptionInit);
+          await applyPendingCandidates();
+        } catch (error) {
+          onError(error instanceof Error ? `Could not connect the call: ${error.message}` : 'Could not connect the call.');
+        }
+      })();
+    }, (error) => onError(`Call signaling failed: ${error.message}`)));
+
     try {
       const offer = await peer.createOffer();
       await peer.setLocalDescription(offer);
-      socket.emit('offer', { description: peer.localDescription?.toJSON() });
+      await setDoc(offerRef, {
+        description: peer.localDescription?.toJSON(),
+        createdAt: serverTimestamp(),
+      });
     } catch (error) {
       onError(error instanceof Error ? `Could not start the call: ${error.message}` : 'Could not start the call.');
     }
-  });
-  socket.on('room-ready', async ({ peerCount }: { peerCount: number }) => {
-    if (role !== 'agent' || peerCount < 2 || peer.signalingState !== 'stable') return;
-    try {
-      const offer = await peer.createOffer();
-      await peer.setLocalDescription(offer);
-      socket.emit('offer', { description: peer.localDescription?.toJSON() });
-    } catch (error) {
-      onError(error instanceof Error ? `Could not start the call: ${error.message}` : 'Could not start the call.');
-    }
-  });
-  socket.emit('join-call', { callId, role });
+  }
 
   return close;
 }

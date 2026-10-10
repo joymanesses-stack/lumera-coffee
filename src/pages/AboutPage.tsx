@@ -28,7 +28,7 @@ export const AboutPage: React.FC = () => {
             About Lumera Coffee
           </h1>
           <p className="text-sm sm:text-base text-[#A8A498] max-w-2xl mx-auto mt-4 font-light leading-relaxed">
-            Founded on trust, origin integrity, and responsible international trade. Connecting pristine highland coffee terroirs with discerning buyers worldwide.
+            A Rwandan coffee brand bringing the quality, authenticity and origin of Rwandan Arabica to international markets.
           </p>
         </div>
       </section>
@@ -48,10 +48,10 @@ export const AboutPage: React.FC = () => {
             </h2>
             <div className="space-y-4 text-base text-[#C2BEB2] font-light leading-relaxed">
               <p>
-                We work with carefully selected coffee producers and supply partners to source quality coffee while maintaining a strong focus on consistency, traceability, and responsible sourcing.
+                Lumera Company Ltd focuses on carefully selected green coffee beans and roasted coffee from Rwanda. Our coffee comes from Karongi and Nyamasheke, and we connect its growing regions with importers, distributors, roasters, retailers and hospitality businesses.
               </p>
               <p className="text-[#E5C378] font-medium text-lg font-serif-luxury italic">
-                Our goal is simple: to connect the richness of coffee-growing regions with buyers around the world.
+                We build business partnerships around product quality, clear communication and professional service.
               </p>
             </div>
           </div>
@@ -70,16 +70,16 @@ export const AboutPage: React.FC = () => {
                 Our Mission
               </span>
               <h3 className="text-2xl font-bold text-white mb-4 font-display">
-                Connecting Origin & World
+                Connecting Rwanda & the World
               </h3>
 
               <blockquote className="text-base text-[#D0CCC2] font-serif-luxury italic border-l-2 border-[#C5A059] pl-4 py-1 leading-relaxed">
-                "To connect coffee producers and global buyers through reliable sourcing, exceptional quality, and responsible export."
+                "To bring authentic Rwandan Arabica coffee to international markets and build reliable business partnerships."
               </blockquote>
             </div>
 
             <div className="mt-8 pt-4 border-t border-[#1C221D] text-xs text-[#8E8A80]">
-              Built to serve international roasters, importers, and distributors with unwavering consistency.
+              We work with importers, distributors, roasters, retailers and hospitality businesses.
             </div>
           </div>
 
@@ -94,16 +94,16 @@ export const AboutPage: React.FC = () => {
                 Our Vision
               </span>
               <h3 className="text-2xl font-bold text-white mb-4 font-display">
-                A Trusted Global Partner
+                Clear, Reliable Partnerships
               </h3>
 
               <blockquote className="text-base text-[#D0CCC2] font-serif-luxury italic border-l-2 border-[#C5A059] pl-4 py-1 leading-relaxed">
-                "To become a trusted global coffee partner recognized for quality, transparency, and long-term relationships."
+                "We aim to grow lasting partnerships through clear communication, product alignment and mutually agreed terms."
               </blockquote>
             </div>
 
             <div className="mt-8 pt-4 border-t border-[#1C221D] text-xs text-[#8E8A80]">
-              Cultivating multi-year supply contracts founded on mutual prosperity and respect.
+              Product details and commercial terms are confirmed for each order.
             </div>
           </div>
         </div>
@@ -115,35 +115,35 @@ export const AboutPage: React.FC = () => {
               Our Principles
             </span>
             <h3 className="text-2xl sm:text-3xl font-bold text-white font-display">
-              Ethical Sourcing & Environmental Responsibility
+              Quality, Origin & Clear Trade
             </h3>
             <p className="text-xs sm:text-sm text-[#A19D92] mt-2 font-light leading-relaxed">
-              Long-term exporter sustainability requires direct economic vitality for coffee farming families and preservation of pristine mountain ecosystems.
+              We value product quality, origin traceability and responsible business practices. Details are confirmed for each product and coffee batch.
             </p>
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
             <div className="p-6 rounded-xl bg-[#0B0D0C] border border-[#1F2620]">
               <HeartHandshake className="w-6 h-6 text-[#C5A059] mb-3" />
-              <h4 className="text-sm font-bold text-white uppercase tracking-wider mb-2">Fair Farmgate Cherry Prices</h4>
+              <h4 className="text-sm font-bold text-white uppercase tracking-wider mb-2">Rwandan Origin</h4>
               <p className="text-xs text-[#8E8A80] font-light leading-relaxed">
-                Partner smallholders receive premium, transparent cash payouts upon cherry delivery, providing livelihood stability and incentivizing selective ripe harvesting.
+                Our Arabica coffee comes from Karongi and Nyamasheke, Rwanda.
               </p>
             </div>
 
             <div className="p-6 rounded-xl bg-[#0B0D0C] border border-[#1F2620]">
               <Leaf className="w-6 h-6 text-[#C5A059] mb-3" />
-              <h4 className="text-sm font-bold text-white uppercase tracking-wider mb-2">Aquifer & Forest Protection</h4>
+              <h4 className="text-sm font-bold text-white uppercase tracking-wider mb-2">Batch Information</h4>
               <p className="text-xs text-[#8E8A80] font-light leading-relaxed">
-                Eco-pulpers reduce water usage by up to 80%. Washing station wastewater is neutralised in natural vetiver filtration ponds before returning to mountain watersheds.
+                Processing, grade and product specifications are provided for the selected batch when available.
               </p>
             </div>
 
             <div className="p-6 rounded-xl bg-[#0B0D0C] border border-[#1F2620]">
               <ShieldCheck className="w-6 h-6 text-[#C5A059] mb-3" />
-              <h4 className="text-sm font-bold text-white uppercase tracking-wider mb-2">Total Contract Fidelity</h4>
+              <h4 className="text-sm font-bold text-white uppercase tracking-wider mb-2">Clear Trade Terms</h4>
               <p className="text-xs text-[#8E8A80] font-light leading-relaxed">
-                When you sign a contract with Lumera Coffee, volume allocations, moisture limits, and cupping score profiles are guaranteed without compromise.
+                Pricing, minimum order quantity, packaging and delivery terms are confirmed in a formal quotation.
               </p>
             </div>
           </div>
@@ -155,7 +155,7 @@ export const AboutPage: React.FC = () => {
             Interested in Partnering with Lumera Coffee?
           </h3>
           <p className="text-xs sm:text-sm text-[#8F8B81] max-w-lg mx-auto mb-6">
-            Speak directly with our trade operations desk to explore spot offerings, forward bookings, or sample evaluations.
+            Contact us for product details, sample requests, bulk orders, pricing or international shipping inquiries.
           </p>
           <Link
             to="/contact"

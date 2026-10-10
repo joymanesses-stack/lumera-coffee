@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from 'react';
+﻿import React, { useState, useEffect, useRef } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { Logo } from './Logo';
 import { NAV_DROPDOWNS } from '../data/navDropdownData';
@@ -74,11 +74,6 @@ export const Navbar: React.FC<NavbarProps> = ({
     { label: 'About', path: '/about' },
   ];
 
-  const handleToggleDropdown = (e: React.MouseEvent, path: string) => {
-    e.stopPropagation();
-    setOpenDropdownPath(prev => (prev === path ? null : path));
-  };
-
   const handleNavigate = (path: string) => {
     setOpenDropdownPath(null);
     navigate(path);
@@ -89,38 +84,44 @@ export const Navbar: React.FC<NavbarProps> = ({
       <nav 
         className={`transition-all duration-500 ${
           isScrolled 
-            ? 'bg-[#0B0C0D]/95 backdrop-blur-md border-b border-[#C5A059]/25 py-3.5 shadow-2xl shadow-black/80' 
-            : 'bg-gradient-to-b from-[#0B0C0D]/90 via-[#0B0C0D]/75 to-transparent backdrop-blur-sm py-5 sm:py-6 border-b border-[#C5A059]/15'
+            ? 'bg-[#173B2B]/98 backdrop-blur-md border-b border-[#A96532]/45 py-3.5 shadow-lg shadow-black/20' 
+            : 'bg-gradient-to-b from-[#173B2B]/98 via-[#173B2B]/90 to-[#173B2B]/80 backdrop-blur-sm py-5 sm:py-6 border-b border-[#A96532]/35'
         }`}
       >
         <div className="max-w-7xl mx-auto px-6 sm:px-8 lg:px-12 flex items-center justify-between">
           {/* Circular Brand Logo */}
           <Link 
             to="/" 
-            className="group flex items-center gap-3 shrink-0" 
+            className="navbar-brand group flex items-center gap-3 shrink-0" 
             onClick={() => setOpenDropdownPath(null)}
           >
-            <Logo size="md" showTagline={false} />
+            <Logo size="lg" showTagline={false} />
           </Link>
 
           {/* Desktop Nav: Spacious, serene, no visual icon clutter */}
-          <div className="hidden lg:flex items-center gap-7 xl:gap-9">
+          <div className="hidden lg:flex items-center gap-8 xl:gap-10">
             {navItems.map((item) => {
               const isOpen = openDropdownPath === item.path;
               const isCurrentRoute = location.pathname === item.path;
               const config = NAV_DROPDOWNS[item.path];
 
               return (
-                <div key={item.path} className="relative">
-                  {/* Clean text button with generous hit area */}
-                  <button
-                    onClick={(e) => handleToggleDropdown(e, item.path)}
-                    className={`text-xs uppercase tracking-[0.2em] font-medium transition-all py-2 px-1 cursor-pointer select-none relative ${
+                <div
+                  key={item.path}
+                  className="relative"
+                  onMouseEnter={() => setOpenDropdownPath(item.path)}
+                  onMouseLeave={() => setOpenDropdownPath(null)}
+                >
+                  {/* Clicking a title opens its page; hovering reveals its section links. */}
+                  <Link
+                    to={item.path}
+                    onClick={() => setOpenDropdownPath(null)}
+                    className={`text-[13px] normal-case tracking-normal font-medium transition-all py-2 px-1 cursor-pointer select-none relative ${
                       isOpen
-                        ? 'text-[#F3E5AB] font-bold'
+                        ? 'text-[#E7C48C] font-bold'
                         : isCurrentRoute
-                        ? 'text-[#E5C378] font-bold'
-                        : 'text-[#C8C5BC] hover:text-[#C5A059]'
+                        ? 'text-[#E7C48C] font-bold'
+                        : 'text-[#F4F0E7] hover:text-[#E7C48C]'
                     }`}
                     aria-expanded={isOpen}
                   >
@@ -128,58 +129,49 @@ export const Navbar: React.FC<NavbarProps> = ({
                     
                     {/* Subtle active / open indicator dot */}
                     {(isOpen || isCurrentRoute) && (
-                      <span className="absolute -bottom-0.5 left-1/2 -translate-x-1/2 w-1.5 h-1.5 rounded-full bg-[#C5A059] shadow-[0_0_8px_#C5A059]" />
+                      <span className="absolute -bottom-0.5 left-1/2 -translate-x-1/2 w-1.5 h-1.5 rounded-full bg-[#D28A52] shadow-[0_0_8px_#D28A52]" />
                     )}
-                  </button>
+                  </Link>
 
                   {/* ========================================================= */}
                   {/* Anchored Dropdown Popover (Directly underneath the word) */}
                   {/* ========================================================= */}
                   {isOpen && config && (
                     <div 
-                      className="absolute top-full left-1/2 -translate-x-1/2 mt-3 w-72 rounded-xl bg-[#0E1210]/98 backdrop-blur-2xl border border-[#C5A059]/40 shadow-[0_20px_45px_rgba(0,0,0,0.9)] p-3 z-50 animate-fadeIn"
+                      className="absolute top-full left-1/2 -translate-x-1/2 w-64 rounded-xl bg-[#F7F4EC] border border-[#D9D3C4] shadow-[0_18px_40px_rgba(24,44,32,0.22)] p-3 z-50 animate-fadeIn"
                       onClick={(e) => e.stopPropagation()}
                     >
                       {/* Top mini gold accent line */}
-                      <div className="absolute top-0 left-6 right-6 h-[1.5px] bg-gradient-to-r from-transparent via-[#C5A059] to-transparent" />
+                      <div className="absolute top-0 left-6 right-6 h-[2px] bg-gradient-to-r from-transparent via-[#A96532] to-transparent" />
 
                       {/* Mini Header */}
-                      <div className="px-2 pt-1.5 pb-2 border-b border-[#1E2520] flex items-center justify-between">
-                        <span className="text-[10px] uppercase tracking-[0.22em] text-[#C5A059] font-bold">
+                      <div className="px-2 pt-1.5 pb-2 border-b border-[#DDD8CC]">
+                        <span className="text-[10px] uppercase tracking-[0.18em] text-[#7B4A2A] font-bold">
                           {config.label}
-                        </span>
-                        <span className="text-[9px] text-[#7A766D] font-mono uppercase">
-                          {config.badge}
                         </span>
                       </div>
 
                       {/* Clean list of sections on this page */}
                       <div className="py-1.5 space-y-1">
                         {config.sections.map((sec, idx) => (
-                          <div
+                          <button
                             key={idx}
                             onClick={() => handleNavigate(item.path)}
-                            className="group flex items-start justify-between gap-2 p-2 rounded-lg hover:bg-[#162019] transition-all cursor-pointer"
+                            className="group w-full flex items-center justify-between gap-3 px-2.5 py-2.5 rounded-lg text-left hover:bg-[#E9EDE5] transition-colors cursor-pointer"
                           >
-                            <div className="space-y-0.5 min-w-0">
-                              <span className="text-xs font-semibold text-white group-hover:text-[#F3E5AB] block truncate">
+                              <span className="text-[12px] leading-snug font-semibold text-[#26382D] group-hover:text-[#7B4A2A] block">
                                 {sec.title}
                               </span>
-                              <span className="text-[10.5px] text-[#8F8B81] font-light leading-snug block line-clamp-1">
-                                {sec.desc}
-                              </span>
-                            </div>
-
-                            <ChevronRight className="w-3.5 h-3.5 text-[#C5A059]/40 group-hover:text-[#C5A059] group-hover:translate-x-0.5 transition-all shrink-0 mt-0.5" />
-                          </div>
+                            <ChevronRight className="w-3.5 h-3.5 text-[#98603A]/60 group-hover:text-[#7B4A2A] group-hover:translate-x-0.5 transition-all shrink-0" />
+                          </button>
                         ))}
                       </div>
 
                       {/* Bottom Direct Page Jump */}
-                      <div className="pt-2 border-t border-[#1C231E]">
+                      <div className="pt-2 border-t border-[#DDD8CC]">
                         <button
                           onClick={() => handleNavigate(item.path)}
-                          className="w-full py-1.5 px-3 rounded-lg gold-button-gradient text-[10.5px] uppercase tracking-wider font-bold flex items-center justify-center gap-1.5 cursor-pointer shadow-sm"
+                          className="w-full py-2 px-3 rounded-lg bg-[#214A35] text-[#F7F4EC] text-[10.5px] uppercase tracking-wider font-bold flex items-center justify-center gap-1.5 cursor-pointer hover:bg-[#173B2B] transition-colors"
                         >
                           <span>Explore {config.label}</span>
                           <ArrowRight className="w-3 h-3" />
@@ -197,7 +189,7 @@ export const Navbar: React.FC<NavbarProps> = ({
             <Link
               to="/contact"
               onClick={() => setOpenDropdownPath(null)}
-              className="gold-button-gradient px-5 py-2 rounded-full text-xs uppercase tracking-[0.16em] font-bold shadow-md shadow-[#C5A059]/15 flex items-center gap-2 group cursor-pointer transition-transform hover:scale-[1.02]"
+              className="px-5 py-2 rounded-full text-xs uppercase tracking-[0.16em] font-bold shadow-md flex items-center gap-2 group cursor-pointer transition-colors bg-[#B86F3F] text-white hover:bg-[#C6814E]"
             >
               <span>REQUEST A QUOTE</span>
               <ChevronRight className="w-3.5 h-3.5 transition-transform group-hover:translate-x-0.5" />
@@ -209,7 +201,7 @@ export const Navbar: React.FC<NavbarProps> = ({
             <Link
               to="/contact"
               onClick={() => setMobileMenuOpen(false)}
-              className="gold-button-gradient px-3.5 py-1.5 rounded-full text-[11px] font-bold uppercase tracking-wider"
+              className="px-3.5 py-1.5 rounded-full text-[11px] font-bold uppercase tracking-wider bg-[#B86F3F] text-white hover:bg-[#C6814E]"
             >
               Quote
             </Link>
@@ -225,7 +217,7 @@ export const Navbar: React.FC<NavbarProps> = ({
 
         {/* Mobile Navigation Drawer */}
         {mobileMenuOpen && (
-          <div className="lg:hidden bg-[#0D0F0E] border-b border-[#C5A059]/30 px-6 py-6 animate-fadeIn shadow-2xl max-h-[85vh] overflow-y-auto">
+          <div className="lg:hidden bg-[#173B2B] border-b border-[#A96532]/40 px-6 py-6 animate-fadeIn shadow-2xl max-h-[85vh] overflow-y-auto">
             <div className="flex flex-col space-y-2">
               {navItems.map((item) => {
                 const config = NAV_DROPDOWNS[item.path];
@@ -253,22 +245,16 @@ export const Navbar: React.FC<NavbarProps> = ({
 
                     {/* Expanded Mobile Details */}
                     {isExpanded && config && (
-                      <div className="mt-1 p-3 rounded-lg bg-[#121614] border border-[#232B25] space-y-2 animate-fadeIn">
-                        <div className="text-[10px] uppercase tracking-wider text-[#C5A059] font-bold">
-                          What is on this page:
-                        </div>
+                      <div className="mt-1 p-3 rounded-lg bg-[#F7F4EC] border border-[#D9D3C4] space-y-2 animate-fadeIn">
                         <div className="space-y-1">
                           {config.sections.map((sec, idx) => (
-                            <div key={idx} className="text-[10.5px] text-[#CDC9BF] flex items-start gap-1.5">
-                              <span className="text-[#C5A059]">•</span>
-                              <span><strong>{sec.title}:</strong> {sec.desc}</span>
-                            </div>
+                            <button key={idx} onClick={() => handleNavigate(item.path)} className="group w-full px-2 py-2 text-left text-xs font-medium text-[#26382D] rounded-md hover:bg-[#E9EDE5] hover:text-[#7B4A2A]">{sec.title}</button>
                           ))}
                         </div>
 
                         <button
                           onClick={() => handleNavigate(item.path)}
-                          className="w-full mt-2 gold-button-gradient py-2 rounded text-[11px] uppercase tracking-wider font-bold"
+                          className="w-full mt-2 bg-[#214A35] text-[#F7F4EC] py-2 rounded text-[11px] uppercase tracking-wider font-bold"
                         >
                           Go to {item.label} Page
                         </button>
@@ -299,3 +285,4 @@ export const Navbar: React.FC<NavbarProps> = ({
     </header>
   );
 };
+

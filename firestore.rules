@@ -6,7 +6,31 @@ service cloud.firestore {
     }
 
     function isAgent() {
-      return signedIn() && request.auth.token.agent == true;
+      return signedIn()
+        && ((exists(/databases/$(database)/documents/agent/$(request.auth.uid))
+            && get(/databases/$(database)/documents/agent/$(request.auth.uid)).data.active == true)
+          || (exists(/databases/$(database)/documents/agents/$(request.auth.uid))
+            && get(/databases/$(database)/documents/agents/$(request.auth.uid)).data.active == true));
+    }
+
+    function isActiveCallParticipant(callId) {
+      let callPath = /databases/$(database)/documents/calls/$(callId);
+      return signedIn()
+        && exists(callPath)
+        && get(callPath).data.status == 'accepted'
+        && (get(callPath).data.callerUid == request.auth.uid
+          || (isAgent() && get(callPath).data.agentUid == request.auth.uid));
+    }
+
+    match /agent/{agentUid} {
+      allow get: if signedIn() && request.auth.uid == agentUid;
+      allow list, create, update, delete: if false;
+    }
+
+    // Accept the plural collection for compatibility with existing setup instructions/data.
+    match /agents/{agentUid} {
+      allow get: if signedIn() && request.auth.uid == agentUid;
+      allow list, create, update, delete: if false;
     }
 
     match /inquiries/{inquiryId} {
@@ -22,40 +46,3 @@ service cloud.firestore {
       allow update: if isAgent()
         && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['status', 'updatedAt'])
         && request.resource.data.status in ['new', 'in_progress', 'contacted', 'closed'];
-      allow delete: if false;
-    }
-
-    match /calls/{callId} {
-      allow create: if signedIn()
-        && request.resource.data.callerUid == request.auth.uid
-        && request.resource.data.status == 'ringing'
-        && request.resource.data.mode in ['voice', 'video']
-        && request.resource.data.channel is string
-        && request.resource.data.createdAt == request.time;
-      allow read: if isAgent() || (
-        signedIn()
-        && resource.data.callerUid == request.auth.uid
-      );
-      allow update: if (
-          isAgent()
-          && resource.data.status == 'ringing'
-          && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['status', 'agentUid', 'acceptedAt'])
-          && request.resource.data.status in ['accepted', 'declined']
-          && request.resource.data.agentUid == request.auth.uid
-        ) || (
-          signedIn()
-          && resource.data.callerUid == request.auth.uid
-          && resource.data.status in ['ringing', 'accepted']
-          && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['status', 'endedAt'])
-          && request.resource.data.status == 'ended'
-        ) || (
-          isAgent()
-          && resource.data.agentUid == request.auth.uid
-          && resource.data.status == 'accepted'
-          && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['status', 'endedAt'])
-          && request.resource.data.status == 'ended'
-        );
-      allow delete: if false;
-    }
-  }
-}

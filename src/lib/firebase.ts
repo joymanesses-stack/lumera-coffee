@@ -12,7 +12,10 @@ const config = {
   appId: import.meta.env.VITE_FIREBASE_APP_ID,
 };
 
-export const firebaseConfigured = Object.values(config).every(Boolean);
+export const missingFirebaseConfig = Object.entries(config)
+  .filter(([, value]) => !value?.trim())
+  .map(([key]) => `VITE_FIREBASE_${key.replace(/[A-Z]/g, (letter) => `_${letter}`).toUpperCase()}`);
+export const firebaseConfigured = missingFirebaseConfig.length === 0;
 const app = firebaseConfigured ? initializeApp(config) : null;
 
 if (app && import.meta.env.VITE_FIREBASE_APPCHECK_SITE_KEY) {

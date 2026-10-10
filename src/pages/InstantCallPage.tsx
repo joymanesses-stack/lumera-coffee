@@ -9,7 +9,7 @@ import {
   type CallMode,
   type CallStatus,
 } from '../lib/calls';
-import { firebaseConfigured } from '../lib/firebase';
+import { firebaseConfigured, missingFirebaseConfig } from '../lib/firebase';
 
 export const InstantCallPage: React.FC = () => {
   const [selectedMode, setSelectedMode] = useState<CallMode>('voice');
@@ -178,24 +178,8 @@ export const InstantCallPage: React.FC = () => {
         stream.getTracks().forEach((track) => track.stop());
         streamRef.current = null;
       }
-      setCallError(
-        selectedMode === 'video'
-          ? 'Camera preview is active, but live calls are unavailable because Firebase is missing from this build. Add the six VITE_FIREBASE_* web-app values in Netlify → Site configuration → Environment variables, then redeploy.'
-          : 'Live calls are unavailable because Firebase is missing from this build. Add the six VITE_FIREBASE_* web-app values in Netlify → Site configuration → Environment variables, then redeploy.'
-      );
-      return;
-    }
-
-    if (!import.meta.env.VITE_SIGNALING_SERVER_URL) {
-      if (selectedMode === 'voice') {
-        stream.getTracks().forEach((track) => track.stop());
-        streamRef.current = null;
-      }
-      setCallError(
-        selectedMode === 'video'
-          ? 'Camera preview is active, but live calls are unavailable because VITE_SIGNALING_SERVER_URL is missing from this build. Configure it in Netlify and redeploy.'
-          : 'Live calls are unavailable because VITE_SIGNALING_SERVER_URL is missing from this build. Configure it in Netlify and redeploy.'
-      );
+      const missing = missingFirebaseConfig.join(', ');
+      setCallError(`${selectedMode === 'video' ? 'Camera preview is active, but ' : ''}live calls are unavailable because this build is missing Firebase settings: ${missing}. Add them in Netlify → Site configuration → Environment variables for the Production deploy context, then deploy again.`);
       return;
     }
 
@@ -210,7 +194,12 @@ export const InstantCallPage: React.FC = () => {
       startRingtone();
     } catch (error) {
       if (requestId === callRequestRef.current) {
-        const reason = error instanceof Error ? error.message : 'Unknown call setup error.';
+        const code = typeof error === 'object' && error !== null && 'code' in error ? String(error.code) : '';
+        const reason = code === 'auth/admin-restricted-operation'
+          ? 'Firebase Authentication is rejecting anonymous sign-in. In Firebase Console, open Authentication → Sign-in method and enable Anonymous, then retry.'
+          : code === 'permission-denied'
+            ? 'Firestore denied the call request. Check that the current Firestore rules are deployed and allow signed-in callers to create call requests.'
+            : error instanceof Error ? error.message : 'Unknown call setup error.';
         if (selectedMode === 'voice') {
           stream.getTracks().forEach((track) => track.stop());
           streamRef.current = null;
@@ -468,7 +457,7 @@ export const InstantCallPage: React.FC = () => {
             <p className="mt-3 text-center text-xs leading-relaxed text-[#8E8A80]">
               {selectedMode === 'video' && localStream
                 ? callError
-                  ? 'Your camera preview is working locally. Configure Firebase and the signaling server to connect with an agent.'
+                  ? 'Your camera preview is working locally. Configure Firebase to connect with an agent.'
                   : 'Your camera preview is live on this device while you wait.'
                 : 'You can end the call at any time.'}
             </p>

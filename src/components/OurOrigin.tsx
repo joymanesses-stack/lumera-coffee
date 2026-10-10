@@ -80,7 +80,7 @@ export const OurOrigin: React.FC = () => {
           {/* Visual Terroir Card */}
           <div className="lg:col-span-7 rounded-2xl overflow-hidden relative min-h-[420px] border border-[#242C27] flex flex-col justify-end p-8 group">
             <img
-              src="https://images.unsplash.com/photo-1501339847302-ac426a4a7cbb?auto=format&fit=crop&w=1400&q=80"
+              src="/images/lumera/coffee-blossom-green-cherries.jpeg"
               alt="Highland Coffee Terroir"
               className="absolute inset-0 w-full h-full object-cover group-hover:scale-105 transition-transform duration-1000 opacity-60"
             />

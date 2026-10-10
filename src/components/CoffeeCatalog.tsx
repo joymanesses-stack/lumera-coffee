@@ -41,7 +41,7 @@ export const CoffeeCatalog: React.FC<CoffeeCatalogProps> = ({
       product.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
       product.variety.toLowerCase().includes(searchTerm.toLowerCase()) ||
       product.process.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      product.cupProfile.some(note => note.toLowerCase().includes(searchTerm.toLowerCase()));
+      (product.cupProfile || []).some(note => note.toLowerCase().includes(searchTerm.toLowerCase()));
     return matchesCategory && matchesSearch;
   });
 

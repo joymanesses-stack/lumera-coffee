@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+﻿import React, { useState, useEffect } from 'react';
 import { COFFEE_PRODUCTS } from '../data/coffeeProducts';
 import { QuoteFormState } from '../types';
 import { 
@@ -33,13 +33,13 @@ export const QuoteModal: React.FC<QuoteModalProps> = ({
     phone: '',
     country: '',
     businessType: 'Importer',
-    coffeeType: selectedCoffeeName || 'Lumera Highland Reserve — Red Bourbon G1',
-    quantityRequired: '1 x 20ft FCL Container (320 bags / 19.2 MT)',
-    incoterm: 'FOB (Free on Board)',
+    coffeeType: selectedCoffeeName || COFFEE_PRODUCTS[0].name,
+    quantityRequired: '',
+    incoterm: 'To be discussed',
     destinationPort: '',
-    preferredPackaging: '60 kg Jute Bag with Hermetic GrainPro® Liner',
-    targetShippingMonth: 'Next Available Sailing',
-    requestSamples: true,
+    preferredPackaging: '',
+    targetShippingMonth: '',
+    requestSamples: false,
     message: '',
   });
 
@@ -47,6 +47,7 @@ export const QuoteModal: React.FC<QuoteModalProps> = ({
   const [refId, setRefId] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [submissionError, setSubmissionError] = useState('');
+  const selectedProduct = COFFEE_PRODUCTS.find((product) => product.name === formData.coffeeType);
 
   useEffect(() => {
     if (selectedCoffeeName) {
@@ -96,7 +97,7 @@ export const QuoteModal: React.FC<QuoteModalProps> = ({
             Request an Export Quotation & Samples
           </h2>
           <p className="text-xs sm:text-sm text-[#A8A498] mt-1 font-light">
-            Receive official FOB/CIF pricing, coffee technical specifications, and air courier evaluation samples.
+            Share your requirements to request product details, pricing, sample information or shipping options.
           </p>
         </div>
 
@@ -115,9 +116,9 @@ export const QuoteModal: React.FC<QuoteModalProps> = ({
               </p>
               <div className="p-4 bg-[#0B0D0C] rounded-xl border border-[#202822] text-left text-xs text-[#AAA69B] space-y-2 max-w-md mx-auto">
                 <p>• Commercial offer for <strong className="text-white">{formData.coffeeType}</strong> will be prepared for <strong className="text-white">{formData.companyName}</strong>.</p>
-                <p>• Turnaround: 24 business hours to <strong className="text-white">{formData.email}</strong>.</p>
+                <p>• The team will review your requirements and follow up at <strong className="text-white">{formData.email}</strong>.</p>
                 {formData.requestSamples && (
-                  <p className="text-emerald-400">• 300g–500g green samples queued for DHL express courier delivery.</p>
+                  <p className="text-emerald-400">• We will contact you about sample availability and arrangements.</p>
                 )}
               </div>
               <button
@@ -215,14 +216,14 @@ export const QuoteModal: React.FC<QuoteModalProps> = ({
                     <option value="Importer">Green Coffee Importer</option>
                     <option value="Roaster">Specialty / Commercial Roaster</option>
                     <option value="Distributor">Wholesale Distributor</option>
-                    <option value="Broker">Coffee Broker</option>
-                    <option value="Private Label / Manufacturer">Private Label / Manufacturer</option>
+                    <option value="Retailer">Retailer</option>
+                    <option value="Hospitality">Hotel, restaurant or coffee shop</option><option value="Other">Other business</option>
                   </select>
                 </div>
 
                 <div>
                   <label className="block text-xs font-medium text-[#C8C4B8] mb-1">
-                    Coffee Lot Desired *
+                    Product Type *
                   </label>
                   <select
                     value={formData.coffeeType}
@@ -234,7 +235,7 @@ export const QuoteModal: React.FC<QuoteModalProps> = ({
                         {p.name}
                       </option>
                     ))}
-                    <option value="Consolidated Container / Multiple Grades">Consolidated Container / Multiple Grades</option>
+                    <option value="Custom business request">Custom business request</option>
                   </select>
                 </div>
 
@@ -242,16 +243,8 @@ export const QuoteModal: React.FC<QuoteModalProps> = ({
                   <label className="block text-xs font-medium text-[#C8C4B8] mb-1">
                     Volume Required *
                   </label>
-                  <select
-                    value={formData.quantityRequired}
-                    onChange={(e) => setFormData({ ...formData, quantityRequired: e.target.value })}
-                    className="w-full bg-[#0B0D0C] border border-[#252C27] rounded px-3 py-2 text-xs text-white focus:outline-none focus:border-[#C5A059]"
-                  >
-                    <option value="Evaluation Samples Only (1kg – 5kg)">Evaluation Samples Only (1kg – 5kg)</option>
-                    <option value="LCL Trial Lot (10 – 50 bags / 600kg – 3,000kg)">LCL Trial Lot (10 – 50 bags / 600kg – 3,000kg)</option>
-                    <option value="1 x 20ft FCL Container (320 bags / 19.2 MT)">1 x 20ft FCL Container (320 bags / 19.2 MT)</option>
-                    <option value="Multi-Container Contract (2+ FCL)">Multi-Container Contract (2+ FCL)</option>
-                  </select>
+                  <input type="text" required placeholder="e.g. 500 kg or 2 metric tons" value={formData.quantityRequired} onChange={(e) => setFormData({ ...formData, quantityRequired: e.target.value })} className="w-full bg-[#0B0D0C] border border-[#252C27] rounded px-3 py-2.5 text-xs text-white placeholder-[#5C5A53] focus:outline-none focus:border-[#C5A059]" />
+                  <p className="mt-1.5 text-[11px] leading-relaxed text-[#C9C3B5]">{selectedProduct ? `Minimum order: ${selectedProduct.moq}.` : 'Minimum order depends on the selected product; please ask us to confirm.'}</p>
                 </div>
 
                 <div>
@@ -263,7 +256,7 @@ export const QuoteModal: React.FC<QuoteModalProps> = ({
                     onChange={(e) => setFormData({ ...formData, incoterm: e.target.value as any })}
                     className="w-full bg-[#0B0D0C] border border-[#252C27] rounded px-3 py-2 text-xs text-white focus:outline-none focus:border-[#C5A059]"
                   >
-                    <option value="FOB (Free on Board)">FOB (Free on Board Origin Port)</option>
+                    <option value="To be discussed">To be discussed</option><option value="FOB (Free on Board)">FOB (Free on Board Origin Port)</option>
                     <option value="CIF (Cost, Insurance & Freight)">CIF (Cost, Insurance & Freight Destination)</option>
                     <option value="CFR (Cost and Freight)">CFR (Cost and Freight)</option>
                     <option value="Sample Lot Request">Sample Lot Request</option>
@@ -294,18 +287,18 @@ export const QuoteModal: React.FC<QuoteModalProps> = ({
                     className="w-4 h-4 rounded text-[#C5A059] bg-[#0B0D0C] border-[#2B332E] focus:ring-[#C5A059]"
                   />
                   <span className="text-xs text-[#E5C378]">
-                    Include 300g–500g green evaluation samples via courier (DHL/FedEx)
+                    I would like to ask about a sample
                   </span>
                 </label>
               </div>
 
               <div>
                 <label className="block text-xs font-medium text-[#C8C4B8] mb-1">
-                  Specific Requirements / Cupping Score Target
+                  Specific Requirements
                 </label>
                 <textarea
                   rows={2}
-                  placeholder="Target delivery date, payment terms, or custom preparation specs..."
+                  placeholder="Preferred roast, packaging, shipping terms or other requirements..."
                   value={formData.message}
                   onChange={(e) => setFormData({ ...formData, message: e.target.value })}
                   className="w-full bg-[#0B0D0C] border border-[#252C27] rounded p-2.5 text-xs text-white placeholder-[#5C5A53] focus:outline-none focus:border-[#C5A059]"
@@ -315,7 +308,7 @@ export const QuoteModal: React.FC<QuoteModalProps> = ({
               <div className="pt-2 flex items-center justify-between gap-4">
                 <span className="text-[11px] text-[#7C786E] flex items-center gap-1.5">
                   <Clock className="w-3.5 h-3.5 text-[#C5A059]" />
-                  24–48h Commercial Response
+                  Response timing confirmed with your inquiry
                 </span>
 
                 {submissionError && <p role="alert" className="text-sm text-red-300">{submissionError}</p>}
@@ -335,3 +328,7 @@ export const QuoteModal: React.FC<QuoteModalProps> = ({
     </div>
   );
 };
+
+
+
+

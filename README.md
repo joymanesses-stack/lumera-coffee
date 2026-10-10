@@ -13,7 +13,7 @@ npm run dev
 
 Copy `.env.example` to `.env.local` and configure the Firebase web app values. The agent desk is available at `/agent` after Firebase Authentication, Firestore, and agent permissions are configured.
 
-Voice and video calls use browser WebRTC with a Socket.IO signaling server. See [BACKEND_SETUP.md](./BACKEND_SETUP.md) for local setup, deployment, and TURN configuration.
+Voice and video calls use browser WebRTC with Firestore for call signaling, so they need no separate signaling server. See [BACKEND_SETUP.md](./BACKEND_SETUP.md) for Firebase and agent setup.
 
 ## Production build
 

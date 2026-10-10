@@ -1,17 +1,6 @@
 import React from 'react';
-import { COFFEE_PRODUCTS } from '../data/coffeeProducts';
 import { Logo } from './Logo';
-import { 
-  X, 
-  FileDown, 
-  Printer, 
-  ShieldCheck, 
-  CheckCircle2, 
-  Globe2, 
-  Calendar,
-  Layers,
-  Award
-} from 'lucide-react';
+import { Printer, X, ArrowRight, Mail, Phone, Globe, Camera } from 'lucide-react';
 
 interface DownloadSheetModalProps {
   isOpen: boolean;
@@ -19,153 +8,110 @@ interface DownloadSheetModalProps {
   onOpenQuoteModal: () => void;
 }
 
-export const DownloadSheetModal: React.FC<DownloadSheetModalProps> = ({
-  isOpen,
-  onClose,
-  onOpenQuoteModal,
-}) => {
+const products = [
+  { name: 'Green Arabica Coffee', details: 'Unroasted Rwandan Arabica from Karongi and Nyamasheke. Processing method, grade and specifications are confirmed per available batch.', formats: 'Green coffee beans', moq: 'One 19,200 kg container, subject to confirmed availability and shipping arrangements' },
+  { name: 'Roasted Coffee', details: 'Rwandan Arabica in light, medium to dark, or dark roast levels, subject to order confirmation.', formats: 'Whole roasted beans or ground coffee', moq: '500 kg' },
+];
+
+export const DownloadSheetModal: React.FC<DownloadSheetModalProps> = ({ isOpen, onClose, onOpenQuoteModal }) => {
   if (!isOpen) return null;
 
-  const handlePrint = () => {
-    window.print();
-  };
-
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/85 backdrop-blur-md animate-fadeIn overflow-y-auto">
-      <div 
-        className="bg-[#121413] border border-[#C5A059]/40 rounded-2xl w-full max-w-5xl max-h-[92vh] overflow-y-auto shadow-2xl relative my-8 print:m-0 print:border-none print:bg-white print:text-black"
-        onClick={(e) => e.stopPropagation()}
-      >
-        {/* Top Control Bar */}
-        <div className="p-4 sm:p-6 border-b border-[#222923] flex items-center justify-between bg-[#151916] sticky top-0 z-20 print:hidden">
-          <div className="flex items-center gap-3">
-            <span className="text-xs uppercase tracking-widest text-[#C5A059] font-bold">
-              Official Offer Sheet
-            </span>
-            <span className="text-white text-xs hidden sm:inline">• 2026/2027 Crop Harvest Allocations</span>
-          </div>
-
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/75 backdrop-blur-sm animate-fadeIn overflow-y-auto" onClick={onClose}>
+      <section className="bg-[#F7F4EC] text-[#26382D] border border-[#D9D3C4] rounded-2xl w-full max-w-5xl max-h-[94vh] overflow-y-auto shadow-2xl relative my-6" onClick={(event) => event.stopPropagation()} aria-labelledby="offering-sheet-title" role="dialog" aria-modal="true">
+        <div className="sticky top-0 z-10 flex items-center justify-between gap-4 px-5 py-4 bg-[#173B2B] text-[#F7F4EC] print:hidden">
+          <span className="text-xs uppercase tracking-[0.16em] font-semibold">General Product Offering Sheet · 2026</span>
           <div className="flex items-center gap-2">
-            <button
-              onClick={handlePrint}
-              className="px-3 py-1.5 rounded bg-[#1B221D] border border-[#2D3A2F] text-xs text-[#DCD8CE] hover:text-white flex items-center gap-1.5 transition-colors cursor-pointer"
-            >
-              <Printer className="w-3.5 h-3.5" />
-              <span>Print / Save PDF</span>
-            </button>
-            <button
-              onClick={onClose}
-              className="p-1.5 rounded-full bg-[#18201A] text-[#ABA69A] hover:text-white border border-[#2B382E] transition-colors cursor-pointer"
-            >
-              <X className="w-5 h-5" />
-            </button>
+            <button onClick={() => window.print()} className="inline-flex items-center gap-2 px-3 py-2 rounded-lg bg-white/10 hover:bg-white/20 text-xs"><Printer size={15} /> Print / Save PDF</button>
+            <button onClick={onClose} className="grid place-items-center w-9 h-9 rounded-full hover:bg-white/10" aria-label="Close offering sheet"><X size={18} /></button>
           </div>
         </div>
 
-        {/* Printable Offer Document */}
-        <div className="p-6 sm:p-10 space-y-8 bg-[#0E100F] print:bg-white print:text-black">
-          {/* Document Header */}
-          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-6 pb-6 border-b border-[#222822] print:border-gray-300">
+        <article className="p-6 sm:p-10 space-y-9 print:p-0 print:text-black">
+          <header className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-6 pb-6 border-b border-[#D9D3C4]">
             <div>
               <Logo size="lg" />
-              <div className="mt-2 text-xs text-[#8F8B80] print:text-gray-600">
-                Registered International Coffee Exporters & Producers<br />
-                Headquarters & Export Desk: Kigali / Bujumbura Highland Corridors<br />
-                Email: export@lumeracoffee.com • Web: www.lumeracoffee.com
-              </div>
+              <p className="mt-3 text-xs leading-6 text-[#526056]">LUMERA COFFEE · RWANDAN ARABICA COFFEE<br />Exceptional coffee. Authentic Rwandan origin.</p>
             </div>
-
-            <div className="text-left sm:text-right text-xs space-y-1">
-              <span className="inline-block px-3 py-1 rounded bg-[#1A261D] text-[#9BE0B3] border border-emerald-500/30 font-bold uppercase tracking-wider print:border-gray-400 print:text-black print:bg-gray-100">
-                Crop Year: 2026 / 2027 Main Harvest
-              </span>
-              <div className="text-white print:text-black font-semibold mt-1">
-                Document Ref: LUM-SPEC-OFFER-2026
-              </div>
-              <div className="text-[#848074] print:text-gray-500">
-                Standard Incoterms: FOB Origin Port & CIF Destination
-              </div>
+            <div className="sm:text-right text-sm leading-6 text-[#526056]">
+              <strong className="text-[#26382D]">Lumera Company Ltd</strong><br />
+              Country of origin: Rwanda<br />
+              Coffee origin: Karongi and Nyamasheke
             </div>
-          </div>
+          </header>
 
-          {/* Table of Lots */}
-          <div className="overflow-x-auto">
-            <table className="w-full text-left text-xs border-collapse">
-              <thead>
-                <tr className="border-b border-[#29332A] text-[#C5A059] print:text-gray-800 uppercase tracking-wider text-[10.5px]">
-                  <th className="py-3 px-2">Lot & Grade</th>
-                  <th className="py-3 px-2">Variety & Process</th>
-                  <th className="py-3 px-2">Altitude</th>
-                  <th className="py-3 px-2">Screen</th>
-                  <th className="py-3 px-2">Moisture</th>
-                  <th className="py-3 px-2">Defect Std</th>
-                  <th className="py-3 px-2">SCA Cup</th>
-                  <th className="py-3 px-2">Packaging & MOQ</th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-[#1D241E] print:divide-gray-200">
-                {COFFEE_PRODUCTS.map((prod) => (
-                  <tr key={prod.id} className="hover:bg-[#141815] transition-colors">
-                    <td className="py-3 px-2 font-medium text-white print:text-black">
-                      {prod.name}
-                      <span className="block text-[10px] text-[#868379] print:text-gray-500">{prod.origin}</span>
-                    </td>
-                    <td className="py-3 px-2 text-[#C2BEB2] print:text-gray-700">
-                      {prod.variety}<br />
-                      <span className="text-[10px] text-[#A6A296]">{prod.process}</span>
-                    </td>
-                    <td className="py-3 px-2 text-[#C2BEB2] print:text-gray-700">{prod.altitude}</td>
-                    <td className="py-3 px-2 font-mono text-[#D4AF37] print:text-gray-800 font-semibold">{prod.screenSize}</td>
-                    <td className="py-3 px-2 text-[#9BE0B3] print:text-gray-800 font-medium">{prod.moisture}</td>
-                    <td className="py-3 px-2 text-[#B8B4A8] print:text-gray-600">{prod.defectCount}</td>
-                    <td className="py-3 px-2 font-bold text-white print:text-black">
-                      {prod.cupScore ? `${prod.cupScore} pts` : 'FAQ Standard'}
-                    </td>
-                    <td className="py-3 px-2 text-[10.5px] text-[#A3A094] print:text-gray-600">
-                      {prod.packaging}<br />
-                      <strong className="text-[#C5A059] print:text-black">MOQ:</strong> {prod.moq}
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
+          <section>
+            <h2 id="offering-sheet-title" className="text-2xl sm:text-3xl font-display font-bold">General Product Offering Sheet | 2026</h2>
+            <p className="mt-3 text-sm leading-7 text-[#405046]">Lumera Coffee is a Rwandan coffee brand bringing the quality, authenticity and origin of Rwandan Arabica to international markets. We focus on green coffee beans and roasted coffee, serving importers, distributors, roasters, retailers and hospitality businesses. Our goal is to build reliable business partnerships through product quality, clear communication and professional service.</p>
+          </section>
 
-          {/* Standard Export Contract Notes */}
-          <div className="bg-[#121614] print:bg-gray-50 p-5 rounded-xl border border-[#222B25] print:border-gray-300 text-xs space-y-2 text-[#ABA69A] print:text-gray-700">
-            <h4 className="font-bold text-white print:text-black uppercase tracking-wider text-[11px] text-[#C5A059]">
-              Export Terms & Conditions Summary:
-            </h4>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-3 pt-1">
-              <div>
-                <p>• <strong>Quality Verification:</strong> All sales subject to approved Pre-Shipment Sample (PSS) courier approval.</p>
-                <p>• <strong>Packaging Integrity:</strong> Multi-layer GrainPro® hermetic barrier inside 60kg food-grade natural jute sacks.</p>
-              </div>
-              <div>
-                <p>• <strong>Container Stuffing:</strong> Standard 20ft FCL container loads 320 bags (19.2 MT) with kraft paper & desiccants.</p>
-                <p>• <strong>Documentation:</strong> Full ICO Certificate of Origin, Phytosanitary Certificate, Bill of Lading, Weight/Quality Certificate.</p>
-              </div>
+          <section>
+            <h3 className="text-lg font-bold font-display mb-4">Coffee products</h3>
+            <div className="grid md:grid-cols-2 gap-4">
+              {products.map((product) => <div key={product.name} className="rounded-xl border border-[#D9D3C4] bg-white/70 p-5">
+                <h4 className="font-bold text-[#214A35]">{product.name}</h4>
+                <p className="mt-2 text-sm leading-6 text-[#526056]">{product.details}</p>
+                <p className="mt-3 text-xs"><strong>Format:</strong> {product.formats}</p>
+                <p className="mt-1 text-xs"><strong>Packaging:</strong> To be agreed based on order volume, buyer requirements and available options.</p>
+                <p className="mt-1 text-xs"><strong>Minimum order:</strong> {product.moq}.</p>
+                <p className="mt-1 text-xs"><strong>Availability:</strong> Subject to current stock and confirmed orders.</p>
+              </div>)}
             </div>
-          </div>
+            <p className="mt-3 text-xs text-[#59665B]">Green coffee minimum quantity and shipping arrangements are confirmed alongside current stock for each inquiry. Green coffee grade and specifications are available upon request.</p>
+          </section>
 
-          {/* Bottom Action */}
-          <div className="flex flex-col sm:flex-row items-center justify-between gap-4 pt-4 border-t border-[#202722] print:hidden">
-            <span className="text-xs text-[#8A867C]">
-              Prices quoted upon receipt of company credentials and volume schedule.
-            </span>
+          <section>
+            <h3 className="text-lg font-bold font-display mb-3">Commercial pricing</h3>
+            <p className="text-sm leading-6 text-[#526056]">Pricing depends on product type, quantity, specifications, packaging and shipping destination. Prices are available upon request.</p>
+            <div className="mt-4 overflow-x-auto rounded-xl border border-[#D9D3C4]">
+              <table className="w-full text-sm text-left"><thead className="bg-[#E8E4D9]"><tr><th className="p-3">Product</th><th className="p-3">Pricing</th></tr></thead><tbody className="divide-y divide-[#E0DBCF]">{['Green Arabica Coffee', 'Roasted Coffee Beans', 'Roasted Ground Coffee', 'Bulk Orders'].map((item) => <tr key={item}><td className="p-3">{item}</td><td className="p-3">Price available upon request</td></tr>)}</tbody></table>
+            </div>
+            <div className="mt-4 p-4 rounded-xl bg-[#E8EDE5] text-sm">
+              <strong>To request a custom business quote, please share:</strong>
+              <p className="mt-2 leading-6">Product type · Quantity in kilograms or metric tons · Preferred roast profile, if applicable · Packaging requirements · Destination country and port/location · Preferred shipping terms or Incoterms agreement.</p>
+              <p className="mt-2 text-xs text-[#59665B]">Final pricing, stock availability, delivery costs and terms will be confirmed in a formal quotation.</p>
+            </div>
+          </section>
 
-            <button
-              onClick={() => {
-                onClose();
-                onOpenQuoteModal();
-              }}
-              className="gold-button-gradient px-6 py-2.5 rounded text-xs uppercase tracking-wider font-bold"
-            >
-              Request Commercial Quote Based on this Offer List
-            </button>
+          <section className="grid md:grid-cols-2 gap-7">
+            <div>
+              <h3 className="text-lg font-bold font-display mb-3">Quality & traceability</h3>
+              <p className="text-sm leading-6 text-[#526056]">Product information is provided based on the selected coffee grade and product type. When required and available, documentation may include a product specification sheet, origin and grade information, processing details, quality assessment or cupping report, packaging information, and required export or transport documents.</p>
+              <p className="mt-3 text-xs leading-5 text-[#59665B]">Grades, certifications, cupping scores and quality parameters are declared only after they have been tested and verified for a specific product or batch.</p>
+            </div>
+            <div>
+              <h3 className="text-lg font-bold font-display mb-3">Ordering process</h3>
+              <ol className="space-y-2 text-sm leading-6 text-[#526056] list-decimal pl-5">
+                <li>Send your product and quantity inquiry.</li>
+                <li>Lumera confirms availability, specifications, pricing, packaging and delivery terms.</li>
+                <li>Both parties agree on product, volume, price, payment and delivery details.</li>
+                <li>The coffee is prepared to the agreed specifications and terms.</li>
+                <li>Shipping and required documentation are finalized before dispatch.</li>
+              </ol>
+            </div>
+          </section>
+
+          <section className="rounded-xl bg-[#173B2B] text-[#F7F4EC] p-5 sm:p-6">
+            <h3 className="text-lg font-bold font-display">International trade inquiries</h3>
+            <p className="mt-2 text-sm leading-6 text-[#E3E7DE]">We welcome inquiries from international importers, distributors, roasters, retailers, coffee shops, hotels, restaurants and other business partners. Contact us for bulk orders, samples, product specifications or shipping inquiries.</p>
+            <div className="grid sm:grid-cols-2 gap-3 mt-5 text-sm">
+              <a className="inline-flex items-center gap-2 hover:text-[#E7C48C]" href="https://lumera-coffee.com"><Globe size={16} /> lumera-coffee.com</a>
+              <a className="inline-flex items-center gap-2 hover:text-[#E7C48C]" href="mailto:lumeracampanyltd@gmail.com"><Mail size={16} /> lumeracampanyltd@gmail.com</a>
+              <a className="inline-flex items-center gap-2 hover:text-[#E7C48C]" href="https://wa.me/250722415434"><Phone size={16} /> +250 722 415 434</a>
+              <a className="inline-flex items-center gap-2 hover:text-[#E7C48C]" href="https://instagram.com/lumeracoffee2026" target="_blank" rel="noreferrer"><Camera size={16} /> @lumeracoffee2026</a>
+            </div>
+          </section>
+
+          <footer className="pt-5 border-t border-[#D9D3C4]">
+            <p className="text-xs leading-5 text-[#59665B]"><strong>Commercial disclaimer:</strong> This sheet outlines our products and trade inquiry process. Product availability, specifications, pricing, minimum order quantities, delivery terms and export capabilities are subject to final confirmation for each transaction.</p>
+            <p className="mt-3 text-center text-sm font-semibold text-[#214A35]">Lumera Coffee · Rwanda’s light in every cup.</p>
+          </footer>
+
+          <div className="flex justify-end print:hidden">
+            <button onClick={() => { onClose(); onOpenQuoteModal(); }} className="inline-flex items-center gap-2 px-5 py-3 rounded-lg bg-[#A96532] text-white text-sm font-semibold hover:bg-[#B97542]">Request a business quote <ArrowRight size={16} /></button>
           </div>
-        </div>
-      </div>
+        </article>
+      </section>
     </div>
   );
 };
