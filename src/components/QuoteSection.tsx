@@ -420,8 +420,8 @@ export const QuoteSection: React.FC<QuoteSectionProps> = ({ initialCoffeeName })
             </div>
 
             <div className="bg-[#121614] border border-[#232C25] rounded-xl p-6 h-full flex flex-col justify-center">
-              <div className="mb-3 text-[#D8D1C0] text-[11px] leading-relaxed">
-                Speak instantly with the Lumera Agent for quick product questions, shipment guidance, and export support.
+              <div className="mb-4 text-[#D8D1C0] text-sm leading-7">
+                Speak with a Lumera agent now for quick answers about our products, shipping, and export support. Prefer to schedule your call? Log in and message an agent to agree on a convenient time for your customer care call.
               </div>
               <Link
                 to="/dashboard"

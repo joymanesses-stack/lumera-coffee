@@ -2,10 +2,13 @@
 import { auth } from './firebase';
 
 const API_URL = (import.meta.env.VITE_API_URL || 'https://lumera-coffee-backend.onrender.com').replace(/\/$/, '');
+const ADMIN_API_URL = (import.meta.env.VITE_ADMIN_API_URL || API_URL).replace(/\/$/, '');
 let backendToken: string | null = null;
 let backendUid: string | null = null;
 let sessionPromise: Promise<string> | null = null;
 let sessionPromiseUid: string | null = null;
+let adminToken: string | null = sessionStorage.getItem('lumera_admin_token');
+export const hasAdminSession = () => Boolean(adminToken);
 
 export async function backendSession(user: User): Promise<string> {
   if (backendToken && backendUid === user.uid) return backendToken;
@@ -26,6 +29,32 @@ export async function backendSession(user: User): Promise<string> {
     if (sessionPromiseUid === user.uid) { sessionPromise = null; sessionPromiseUid = null; }
   });
   return sessionPromise;
+}
+
+export async function adminLogin(email: string, password: string): Promise<void> {
+  const response = await fetch(`${ADMIN_API_URL}/v1/auth/admin-login`, {
+    method: 'POST', headers: { 'content-type': 'application/json' },
+    body: JSON.stringify({ email, password }),
+  });
+  const data = await response.json().catch(() => ({}));
+  if (!response.ok || typeof data.token !== 'string' || data.user?.role !== 'admin') {
+    throw new Error(data.error || 'Administrator sign-in failed.');
+  }
+  adminToken = data.token;
+  sessionStorage.setItem('lumera_admin_token', adminToken);
+}
+
+export function adminLogout() { adminToken = null; sessionStorage.removeItem('lumera_admin_token'); }
+
+export async function adminApiRequest<T>(path: string, init: RequestInit = {}): Promise<T> {
+  if (!adminToken) throw new Error('Sign in with the administrator account first.');
+  const headers = new Headers(init.headers);
+  headers.set('content-type', 'application/json');
+  headers.set('authorization', `Bearer ${adminToken}`);
+  const response = await fetch(`${ADMIN_API_URL}${path}`, { ...init, headers });
+  const data = await response.json().catch(() => ({}));
+  if (!response.ok) throw new Error(data.error || `Request failed (${response.status}).`);
+  return data as T;
 }
 
 async function ensureBackendSession(): Promise<string> {
@@ -51,3 +80,4 @@ export async function apiRequest<T>(path: string, init: RequestInit = {}): Promi
   if (!response.ok) throw new Error(data.error || `Request failed (${response.status}).`);
   return data as T;
 }
+

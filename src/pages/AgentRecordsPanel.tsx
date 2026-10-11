@@ -1,17 +1,15 @@
-﻿import React, { useState } from 'react';
+import React, { useState } from 'react';
 import { CheckCircle2, Clock3, Eye, Trash2, X } from 'lucide-react';
 
 export type AgentInquiry = { id: string; contactName?: string; companyName?: string; email?: string; phone?: string; coffeeType?: string; quantityRequired?: string; message?: string; status?: string; createdAt?: string };
 export type AgentCall = { id: string; callerUid?: string; caller?: { name?: string; email?: string; phone?: string }; mode?: string; status?: string; createdAt?: string; acceptedAt?: string; missedAt?: string; endedAt?: string };
-export type AgentCustomer = { uid: string; email?: string; displayName?: string; disabled?: boolean };
 const dateLabel = (value?: string) => value ? new Date(value).toLocaleString() : 'Not recorded';
 
-export function AgentRecordsPanel({ calls, inquiries, customers, onUpdateInquiry, onDeleteInquiry, onDeleteCall, onDeleteCustomer }: {
-  calls: AgentCall[]; inquiries: AgentInquiry[]; customers: AgentCustomer[];
+export function AgentRecordsPanel({ calls, inquiries, onUpdateInquiry, onDeleteInquiry, onDeleteCall }: {
+  calls: AgentCall[]; inquiries: AgentInquiry[];
   onUpdateInquiry: (id: string, status: string) => void;
   onDeleteInquiry: (id: string) => void;
   onDeleteCall: (id: string) => void;
-  onDeleteCustomer: (uid: string) => void;
 }) {
   const [selectedCall, setSelectedCall] = useState<AgentCall | null>(null);
   const [selectedInquiry, setSelectedInquiry] = useState<AgentInquiry | null>(null);
@@ -38,12 +36,6 @@ export function AgentRecordsPanel({ calls, inquiries, customers, onUpdateInquiry
         </div>
       </section>
     </div>
-    <section className="mt-6 rounded-2xl border border-[#252D27] bg-[#111412] p-5">
-      <h2 className="mb-4 text-xl font-bold text-white">Customer accounts ({customers.length})</h2>
-      <p className="mb-4 text-xs text-[#A8A498]">Deleting removes the Firebase sign-in account so the same email can register again. Historical calls and messages remain.</p>
-      <div className="grid gap-2 sm:grid-cols-2 lg:grid-cols-3">{customers.map((customer) => <article key={customer.uid} className="flex min-w-0 items-center justify-between gap-2 rounded border border-[#303831] bg-[#0B0D0C] p-3"><div className="min-w-0"><b className="block truncate text-sm">{customer.displayName || 'Customer'}{customer.disabled ? ' · Disabled' : ''}</b><span className="block truncate text-xs text-[#A8A498]">{customer.email || customer.uid}</span></div><button title="Permanently delete customer account" aria-label={`Delete account ${customer.email || customer.uid}`} onClick={() => onDeleteCustomer(customer.uid)} className="rounded border border-red-900 p-2 text-red-300"><Trash2 className="h-4 w-4"/></button></article>)}</div>
-      {!customers.length && <p className="text-sm text-[#858177]">No customer accounts found.</p>}
-    </section>
     {(selectedCall || selectedInquiry) && <div role="dialog" aria-modal="true" className="fixed inset-0 z-[100] flex items-center justify-center bg-black/70 p-4" onMouseDown={(event) => { if (event.target === event.currentTarget) { setSelectedCall(null); setSelectedInquiry(null); } }}><div className="w-full max-w-xl rounded-2xl border border-[#39463C] bg-[#111412] p-6 text-[#DEDBD2]">
       <div className="mb-4 flex items-center justify-between"><h2 className="text-xl font-bold text-white">{selectedCall ? 'Call details' : 'Inquiry details'}</h2><button aria-label="Close details" onClick={() => { setSelectedCall(null); setSelectedInquiry(null); }}><X className="h-5 w-5"/></button></div>
       {selectedCall && <div className="space-y-3 text-sm"><p><b>Caller:</b> {selectedCall.caller?.name || 'Customer'}</p><p><b>Email:</b> {selectedCall.caller?.email || 'Not provided'}</p><p><b>Phone:</b> {selectedCall.caller?.phone || 'Not provided'}</p><p><b>Call type/status:</b> {selectedCall.mode || 'voice'} / {selectedCall.status || 'ended'}</p><p><b>Started:</b> {dateLabel(selectedCall.createdAt)}</p><p><b>Accepted:</b> {dateLabel(selectedCall.acceptedAt)}</p><p><b>Missed:</b> {dateLabel(selectedCall.missedAt)}</p><p><b>Ended:</b> {dateLabel(selectedCall.endedAt)}</p><p className="break-all"><b>Customer ID:</b> {selectedCall.callerUid || 'Not recorded'}</p><button onClick={() => { onDeleteCall(selectedCall.id); setSelectedCall(null); }} className="mt-2 inline-flex items-center gap-2 rounded border border-red-900 px-4 py-2 text-xs font-semibold text-red-300"><Trash2 className="h-4 w-4"/>Move to Bin</button></div>}

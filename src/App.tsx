@@ -30,6 +30,8 @@ const InstantCallPage = lazy(() =>
 const CustomerDashboardPage = lazy(() => import('./pages/CustomerDashboardPage').then((module) => ({ default: module.CustomerDashboardPage })));
 const CustomerCallHistoryPage = lazy(() => import('./pages/CustomerCallHistoryPage').then((module) => ({ default: module.CustomerCallHistoryPage })));
 const AdminDashboardPage = lazy(() => import('./pages/AdminDashboardPage').then((module) => ({ default: module.AdminDashboardPage })));
+const AdminUserDetailPage = lazy(() => import('./pages/AdminUserDetailPage').then((module) => ({ default: module.AdminUserDetailPage })));
+const AdminBinPage = lazy(() => import('./pages/AdminBinPage').then((module) => ({ default: module.AdminBinPage })));  
 
 export function App() {
   const [isQuoteModalOpen, setIsQuoteModalOpen] = useState(false);
@@ -122,6 +124,8 @@ export function App() {
             <Route path="/dashboard" element={<Suspense fallback={<div className="min-h-screen pt-40 text-center">Loading dashboard…</div>}><CustomerDashboardPage /></Suspense>} />
             <Route path="/call-history" element={<Suspense fallback={<div className="min-h-screen pt-40 text-center">Loading call history…</div>}><CustomerCallHistoryPage /></Suspense>} />
             <Route path="/admin" element={<Suspense fallback={<div className="min-h-screen pt-40 text-center">Loading admin…</div>}><AdminDashboardPage /></Suspense>} />
+            <Route path="/admin/users/:uid" element={<Suspense fallback={<div className="min-h-screen pt-40 text-center">Loading account...</div>}><AdminUserDetailPage /></Suspense>} />
+            <Route path="/admin/bin" element={<Suspense fallback={<div className="min-h-screen pt-40 text-center">Loading Bin...</div>}><AdminBinPage /></Suspense>} />
             <Route path="*" element={<Navigate to="/" replace />} />
           </Routes>
         </main>
