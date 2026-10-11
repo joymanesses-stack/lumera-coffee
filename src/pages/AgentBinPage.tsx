@@ -19,6 +19,7 @@ export const AgentBinPage: React.FC = () => {
   const [messages, setMessages] = useState<BinMessage[]>([]);
   const [calls, setCalls] = useState<BinCall[]>([]);
   const [error, setError] = useState('');
+  const [notice, setNotice] = useState('');
   const loadBin = async () => {
     const [messageResult, callResult] = await Promise.allSettled([
       apiRequest<{ messages: BinMessage[] }>('/v1/conversations/bin'),
@@ -48,9 +49,11 @@ export const AgentBinPage: React.FC = () => {
   const permanentlyDelete = async (message: BinMessage) => {
     if (!window.confirm('Permanently delete this message? This cannot be undone.')) return;
     try {
-      await apiRequest(`/v1/conversations/bin/messages/${encodeURIComponent(message.messageId)}`, { method: 'DELETE' });
+      const result = await apiRequest<{ message?: string; alreadyDeleted?: boolean }>(`/v1/conversations/bin/messages/${encodeURIComponent(message.messageId)}`, { method: 'DELETE' });
       setMessages((items) => items.filter((item) => item.messageId !== message.messageId));
-    } catch (e) { setError(e instanceof Error ? e.message : 'Could not permanently delete message.'); }
+      setError('');
+      setNotice(result.alreadyDeleted ? 'Message already deleted.' : result.message || 'Message permanently deleted.');
+    } catch (e) { setNotice(''); setError(e instanceof Error ? e.message : 'Could not permanently delete message.'); }
   };
   const restoreCall = async (call: BinCall) => {
     try {
@@ -68,6 +71,7 @@ export const AgentBinPage: React.FC = () => {
   if (!user) return <main className="min-h-screen bg-[#0B0D0C] px-4 pt-40 text-center text-[#DEDBD2]"><h1 className="text-2xl font-bold text-white">Agent Bin</h1><p className="mt-3 text-sm text-[#A8A498]">{ready ? 'Sign in with an agent account to view deleted messages.' : 'Checking sign-in…'}</p><Link to="/agent/messages" className="mt-5 inline-flex items-center gap-2 rounded border border-[#3A493D] px-4 py-2 text-sm text-[#C5A059]"><ArrowLeft className="h-4 w-4"/>Agent messages</Link></main>;
   return <main className="min-h-screen bg-[#0B0D0C] px-4 pb-20 pt-36 text-[#DEDBD2] sm:px-6 lg:px-8"><div className="mx-auto max-w-5xl"><header className="mb-8 flex flex-wrap items-end justify-between gap-4"><div><Link to="/agent" className="mb-4 inline-flex items-center gap-2 text-xs text-[#C5A059]"><ArrowLeft className="h-4 w-4"/>Back to agent desk</Link><h1 className="text-3xl font-bold text-white">Agent Bin</h1><p className="mt-2 text-sm text-[#A8A498]">Restore deleted call records or permanently remove them.</p></div><div className="flex flex-wrap gap-2"><span className="rounded-full bg-[#202720] px-3 py-1 text-xs text-[#C5A059]">{messages.length} messages</span><span className="rounded-full bg-[#202720] px-3 py-1 text-xs text-[#C5A059]">{calls.length} calls</span></div></header>
     {error && <p role="alert" className="mb-5 rounded border border-red-900 bg-red-950/30 p-3 text-sm text-red-200">{error}</p>}
+    {notice && <p role="status" className="mb-5 rounded border border-emerald-900 bg-emerald-950/30 p-3 text-sm text-emerald-200">{notice}</p>}
     {!ready && <p className="text-sm text-[#A8A498]">Loading Bin…</p>}
     {!!calls.length && <section aria-label="Deleted call records" className="mb-5 space-y-3 rounded-2xl border border-[#252D27] bg-[#111412] p-4"><h2 className="px-1 text-lg font-bold text-white">Deleted calls</h2>
       {calls.map((call) => <article key={call.id} className="rounded-2xl border border-[#303831] bg-[#0B0D0C] p-5"><div className="flex flex-wrap items-start justify-between gap-3"><div className="min-w-0 flex-1"><p className="break-words font-semibold text-white">{call.caller?.name || call.caller?.email || 'Customer'}</p><p className="mt-1 break-all text-xs text-[#A8A498]">{call.caller?.email || 'No email'} · Customer ID: {call.callerUid || 'Not recorded'}</p><p className="mt-2 text-xs text-[#A8A498]">{call.mode || 'voice'} call · {call.status || 'ended'} · deleted {dateLabel(call.deletedAt)}</p><p className="mt-1 text-xs text-[#A8A498]">Started {dateLabel(call.createdAt)} · accepted {dateLabel(call.acceptedAt)} · ended {dateLabel(call.endedAt)}</p></div><span className="shrink-0 rounded border border-[#39463C] px-2 py-1 text-[10px] uppercase text-[#C5A059]">Call record</span></div><div className="mt-5 flex flex-wrap gap-2"><button onClick={() => void restoreCall(call)} className="inline-flex items-center gap-2 rounded bg-emerald-900 px-4 py-2 text-xs font-semibold"><RotateCcw className="h-4 w-4"/>Restore call</button><button onClick={() => void permanentlyDeleteCall(call)} className="inline-flex items-center gap-2 rounded border border-red-900 px-4 py-2 text-xs text-red-300"><Trash2 className="h-4 w-4"/>Delete permanently</button></div></article>)}
