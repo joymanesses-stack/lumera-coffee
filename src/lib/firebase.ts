@@ -1,6 +1,5 @@
 import { initializeApp } from 'firebase/app';
 import { getAuth } from 'firebase/auth';
-import { getFirestore } from 'firebase/firestore';
 import { initializeAppCheck, ReCaptchaV3Provider } from 'firebase/app-check';
 
 const config = {
@@ -26,12 +25,10 @@ if (app && import.meta.env.VITE_FIREBASE_APPCHECK_SITE_KEY) {
 }
 
 export const auth = app ? getAuth(app) : null;
-export const db = app ? getFirestore(app) : null;
-
-export function requireFirebase() {
-  if (!auth || !db) {
-    throw new Error('Firebase is not configured in this build. Set the required VITE_FIREBASE_* web-app values in the deployment environment and rebuild the site.');
+export function requireAuth() {
+  if (!auth) {
+    throw new Error('Firebase Authentication is not configured in this build.');
   }
 
-  return { auth, db };
+  return auth;
 }

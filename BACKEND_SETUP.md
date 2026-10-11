@@ -1,49 +1,26 @@
-﻿# Firebase and WebRTC setup
+# Lumera backend setup
 
-The website stores buyer inquiries and call requests in Firebase. The `/agent` dashboard receives live Firestore updates and answers calls. WebRTC sends audio and video directly between the caller and agent. Firestore carries the small offer, answer, and network-candidate messages needed to establish that direct connection, so no separate signaling server or `VITE_SIGNALING_SERVER_URL` is required.
+Firebase Authentication remains the browser sign-in provider. The Node API verifies Firebase ID tokens, issues short-lived backend sessions, and accesses Firestore with Firebase Admin. The browser does not use Firestore directly. Deploy `firestore.rules` to deny direct client access; Firebase Admin bypasses these rules.
 
-## Firebase setup
+## Local development
 
-1. Create a Firebase project and register a web app.
-2. Enable **Authentication → Email/Password** and **Anonymous** sign-in providers.
-3. Create the Firestore database.
-4. Copy `.env.example` to `.env.local` and fill in the six Firebase web-app values.
-5. Deploy Firestore rules and indexes from the project root:
+1. Keep the Firebase web app values in the frontend `.env` (or your Vite environment). `VITE_API_URL=http://localhost:3001` points the frontend to the local API.
+2. Copy `server/.env.example` to `server/.env`. Set `SESSION_SECRET` to a long random value and keep `ALLOWED_ORIGINS=http://localhost:5173` for local development.
+3. Configure Firebase Admin credentials for the `lumera-coffee` project using Application Default Credentials. Do not put service account credentials in the frontend environment or commit them.
+4. Start the backend with `npm start` from `server/`, then start Vite on port 5173.
 
-   ```powershell
-   firebase login
-   firebase use --add
-   firebase deploy --only firestore:rules,firestore:indexes
-   ```
+For production, `VITE_API_URL` should be `https://lumera-coffee-backend.onrender.com` (or the deployed HTTPS API origin). Include the deployed website origin in the backend's `ALLOWED_ORIGINS` so browser requests pass CORS checks. Set `SESSION_SECRET` in the backend hosting environment. The backend also needs Firebase Admin credentials with access to the same Firebase project as the frontend.
 
-### Netlify environment variables
+## Authentication and roles
 
-Add the six Firebase web-app values from `.env.example` under **Site configuration → Environment variables**: `VITE_FIREBASE_API_KEY`, `VITE_FIREBASE_AUTH_DOMAIN`, `VITE_FIREBASE_PROJECT_ID`, `VITE_FIREBASE_STORAGE_BUCKET`, `VITE_FIREBASE_MESSAGING_SENDER_ID`, and `VITE_FIREBASE_APP_ID`. Give each variable **Build** scope and enable it for the **Production** deploy context and any other contexts you use. `VITE_FIREBASE_APPCHECK_SITE_KEY` is optional unless App Check is enabled.
+Enable the Firebase sign-in providers used by the app (Email/Password and Google). The `/agent` page exchanges the user's Firebase ID token with the API; agent access is checked from Firebase custom claims or an active `agent/{uid}` / `agents/{uid}` record. The admin email `sgahimbare20@gmail.com` is granted admin access by the backend. Admins can set account roles in `/admin`.
 
-Vite embeds these values at build time. The Netlify build stops and names any missing required values instead of publishing a site that cannot make calls. After saving values, trigger a new production deploy; clear the build cache if the deployed site still reports missing configuration. The local `.env` file is ignored by Git and is not uploaded to Netlify. Ensure all values belong to the same Firebase project where Authentication and Firestore are configured.
+## Features
 
-## Agent access
+- Quote forms submit to `POST /v1/inquiries`.
+- Customers sign in before creating calls; call state uses the backend API and WebRTC signaling uses authenticated Socket.IO.
+- `/dashboard` displays call history and persistent conversation messages.
+- `/agent` loads the call and inquiry queue from backend APIs. Customer chat history and replies are available in `/dashboard`; an agent chat interface is not yet in this frontend.
+- `/admin` provides account role controls and call/inquiry oversight.
 
-1. Create the agent account in Firebase Authentication and enable Email/Password sign-in.
-2. In the Firebase Console, open **Firestore Database → Data**. Create an `agent` collection and a document whose ID is the exact Authentication UID. Add the boolean field `active: true`. Repeat for each approved agent. Set `active` to `false` or delete the document to revoke access. The dashboard also recognizes existing active documents in the older `agents` collection. Only project administrators can write these records; Firestore rules deny client writes.
-3. Deploy the rules after creating the collection structure. The agent signs in at `/agent`, enables call sounds, and keeps the dashboard open while calls are expected.
-
-## Calls and network requirements
-
-The caller creates a `calls/{callId}` request. Once the agent accepts it, both browsers exchange the WebRTC offer, answer, and ICE candidates through protected Firestore documents under that call. Firestore rules restrict signaling reads and writes to the caller and the assigned active agent. Audio and video do not pass through Firestore or a server; they travel peer to peer.
-
-Calls use Google's public STUN server to discover direct network paths. Most networks work without further setup. Some restrictive corporate, school, or mobile networks block direct peer connections and require a TURN relay; TURN is an optional network relay and does not require a Vite signaling-server URL. Use HTTPS in production; browsers only allow camera and microphone access on secure pages or localhost.
-
-## Security and operations
-
-- Firestore allows public inquiry and anonymous call-request creation, but only an authenticated user with an active `agent/{uid}` or `agents/{uid}` membership document can access the agent desk or accept calls. Use `agent/{uid}` for new agent accounts.
-- Call signaling documents can only be read by the caller and assigned agent after a call is accepted. Clients cannot update or delete signal or candidate records.
-- Configure Firebase App Check using `VITE_FIREBASE_APPCHECK_SITE_KEY`, then enable enforcement in the Firebase console.
-- Configure Firebase usage alerts. Firestore signaling creates document reads and writes while calls connect.
-
-## Data flow
-
-- Quote forms create `inquiries/{id}` documents with status `new`; the agent desk updates their status.
-- A caller signs in anonymously and creates a `calls/{id}` document with status `ringing`. The customer's repeating ringtone plays while the agent is being notified.
-- The agent answers from `/agent`; the caller and agent subscribe to the call document.
-- The agent writes an offer, the caller writes an answer, and both peers exchange ICE candidates in the call's protected Firestore subcollections. WebRTC then carries media directly between the browsers.
+Call audio/video uses browser WebRTC. Configure TURN credentials on the backend if users behind restrictive networks cannot establish peer connections with STUN alone.

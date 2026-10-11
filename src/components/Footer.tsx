@@ -5,7 +5,9 @@ import {
   Mail, 
   Phone, 
   MapPin, 
-  ArrowUp
+  ArrowUp,
+  Globe,
+  Camera
 } from 'lucide-react';
 
 interface FooterProps {
@@ -152,7 +154,7 @@ export const Footer: React.FC<FooterProps> = ({
                 </a>
               </div>
 
-              <div className="flex flex-col items-start gap-2 pt-2 text-[11px]"><a href="https://lumera-coffee.com" target="_blank" rel="noreferrer" className="text-white hover:text-[#C5A059]">lumera-coffee.com</a><a href="https://instagram.com/lumeracoffee2026" target="_blank" rel="noreferrer" className="text-white hover:text-[#C5A059]">Instagram: @lumeracoffee2026</a></div>
+              <div className="flex flex-col items-start gap-2 pt-2 text-[11px]"><a href="https://lumera-coffee.com" target="_blank" rel="noreferrer" className="inline-flex items-center gap-2 text-white hover:text-[#C5A059]"><Globe className="h-3.5 w-3.5 shrink-0 text-[#C5A059]"/><span>lumera-coffee.com</span></a><a href="https://instagram.com/lumeracoffee2026" target="_blank" rel="noreferrer" className="inline-flex items-center gap-2 text-white hover:text-[#C5A059]"><Camera className="h-3.5 w-3.5 shrink-0 text-[#C5A059]"/><span>Instagram: @lumeracoffee2026</span></a></div>
             </div>
           </div>
         </div>

@@ -22,9 +22,13 @@ import { Phone } from 'lucide-react';
 const AgentDashboardPage = lazy(() =>
   import('./pages/AgentDashboardPage').then((module) => ({ default: module.AgentDashboardPage }))
 );
+const AgentBinPage = lazy(() => import('./pages/AgentBinPage').then((module) => ({ default: module.AgentBinPage })));
 const InstantCallPage = lazy(() =>
   import('./pages/InstantCallPage').then((module) => ({ default: module.InstantCallPage }))
 );
+const CustomerDashboardPage = lazy(() => import('./pages/CustomerDashboardPage').then((module) => ({ default: module.CustomerDashboardPage })));
+const CustomerCallHistoryPage = lazy(() => import('./pages/CustomerCallHistoryPage').then((module) => ({ default: module.CustomerCallHistoryPage })));
+const AdminDashboardPage = lazy(() => import('./pages/AdminDashboardPage').then((module) => ({ default: module.AdminDashboardPage })));
 
 export function App() {
   const [isQuoteModalOpen, setIsQuoteModalOpen] = useState(false);
@@ -97,6 +101,25 @@ export function App() {
                 </Suspense>
               }
             />
+            <Route
+              path="/agent/bin"
+              element={
+                <Suspense fallback={<div className="min-h-screen bg-[#0B0D0C] pt-40 text-center text-sm text-[#A8A498]">Loading message Bin?</div>}>
+                  <AgentBinPage />
+                </Suspense>
+              }
+            />
+            <Route
+              path="/agent/messages"
+              element={
+                <Suspense fallback={<div className="min-h-screen bg-[#0B0D0C] pt-40 text-center text-sm text-[#A8A498]">Loading agent messages…</div>}>
+                  <AgentDashboardPage />
+                </Suspense>
+              }
+            />
+            <Route path="/dashboard" element={<Suspense fallback={<div className="min-h-screen pt-40 text-center">Loading dashboard…</div>}><CustomerDashboardPage /></Suspense>} />
+            <Route path="/call-history" element={<Suspense fallback={<div className="min-h-screen pt-40 text-center">Loading call history…</div>}><CustomerCallHistoryPage /></Suspense>} />
+            <Route path="/admin" element={<Suspense fallback={<div className="min-h-screen pt-40 text-center">Loading admin…</div>}><AdminDashboardPage /></Suspense>} />
             <Route path="*" element={<Navigate to="/" replace />} />
           </Routes>
         </main>

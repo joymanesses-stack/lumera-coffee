@@ -192,9 +192,9 @@ export const CoffeePage: React.FC<CoffeePageProps> = ({
                   </div>
                 </div>
 
-                <div className="rounded-lg border border-[#B86F3F]/80 bg-[#2A241C] px-4 py-3">
-                  <span className="block text-[10px] uppercase tracking-[0.16em] font-bold text-[#E7A56F]">Minimum order</span>
-                  <span className="block mt-1 text-sm font-semibold leading-relaxed text-white">{coffee.moq}</span>
+                <div className="rounded-lg border border-[#E6CF78] bg-[#FFF4C2] px-4 py-3 shadow-sm">
+                  <span className="block text-xs uppercase tracking-[0.12em] font-extrabold text-[#53564E]">Minimum order</span>
+                  <span className="block mt-1 text-base font-bold leading-relaxed text-[#172019]">{coffee.moq}</span>
                 </div>
 
                 <p className="text-xs text-[#9E9B91] leading-relaxed font-light line-clamp-2">

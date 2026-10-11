@@ -424,7 +424,7 @@ export const QuoteSection: React.FC<QuoteSectionProps> = ({ initialCoffeeName })
                 Speak instantly with the Lumera Agent for quick product questions, shipment guidance, and export support.
               </div>
               <Link
-                to="/instant-call"
+                to="/dashboard"
                 className="gold-button-gradient w-full py-3 rounded text-[10px] uppercase tracking-[0.18em] font-bold flex items-center justify-center gap-2.5 shadow-lg shadow-[#C5A059]/20"
               >
                 <Phone className="w-4 h-4" />

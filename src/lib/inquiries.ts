@@ -1,14 +1,9 @@
-import { addDoc, collection, serverTimestamp } from 'firebase/firestore';
 import type { QuoteFormState } from '../types';
-import { requireFirebase } from './firebase';
+import { apiRequest } from './api';
 
 export async function submitInquiry(formData: QuoteFormState): Promise<string> {
-  const { db } = requireFirebase();
-  const inquiry = await addDoc(collection(db, 'inquiries'), {
-    ...formData,
-    status: 'new',
-    createdAt: serverTimestamp(),
+  const result = await apiRequest<{ id: string }>('/v1/inquiries', {
+    method: 'POST', body: JSON.stringify(formData),
   });
-
-  return inquiry.id;
+  return result.id;
 }

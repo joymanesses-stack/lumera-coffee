@@ -1,5 +1,6 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { Link } from 'react-router-dom';
+import { createUserWithEmailAndPassword, onAuthStateChanged, signInWithEmailAndPassword, signInWithPopup, GoogleAuthProvider, type User } from 'firebase/auth';
 import { ArrowLeft, CheckCircle2, PhoneCall, Video, Bot, ShieldCheck, Sparkles, PhoneOff, LoaderCircle } from 'lucide-react';
 import {
   connectWebRTCCall,
@@ -9,9 +10,14 @@ import {
   type CallMode,
   type CallStatus,
 } from '../lib/calls';
-import { firebaseConfigured, missingFirebaseConfig } from '../lib/firebase';
+import { auth } from '../lib/firebase';
+import { backendSession } from '../lib/api';
 
 export const InstantCallPage: React.FC = () => {
+  const [user, setUser] = useState<User | null>(null);
+  const [authReady, setAuthReady] = useState(false);
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
   const [selectedMode, setSelectedMode] = useState<CallMode>('voice');
   const [isCalling, setIsCalling] = useState(false);
   const [callError, setCallError] = useState('');
@@ -29,6 +35,16 @@ export const InstantCallPage: React.FC = () => {
   const remoteCallRef = useRef<HTMLDivElement>(null);
   const callCleanupRef = useRef<(() => Promise<void>) | null>(null);
   const joinedCallIdRef = useRef<string | null>(null);
+
+  useEffect(() => {
+    if (!auth) { setAuthReady(true); return; }
+    return onAuthStateChanged(auth, async (current) => {
+      setUser(current);
+      try { if (current) await backendSession(current); }
+      catch (error) { setCallError(error instanceof Error ? error.message : 'Could not connect securely to the call service.'); }
+      finally { setAuthReady(true); }
+    });
+  }, []);
 
   useEffect(() => {
     if (videoRef.current && localStream) {
@@ -145,6 +161,7 @@ export const InstantCallPage: React.FC = () => {
   };
 
   const startCall = async () => {
+    if (!user) { setCallError('Sign in or create an account to start a call.'); return; }
     const requestId = ++callRequestRef.current;
     setCallError('');
     setCallStatus(null);
@@ -173,16 +190,6 @@ export const InstantCallPage: React.FC = () => {
       return;
     }
 
-    if (!firebaseConfigured) {
-      if (selectedMode === 'voice') {
-        stream.getTracks().forEach((track) => track.stop());
-        streamRef.current = null;
-      }
-      const missing = missingFirebaseConfig.join(', ');
-      setCallError(`${selectedMode === 'video' ? 'Camera preview is active, but ' : ''}live calls are unavailable because this build is missing Firebase settings: ${missing}. Add them in Netlify → Site configuration → Environment variables for the Production deploy context, then deploy again.`);
-      return;
-    }
-
     try {
       const newCallId = await createCallRequest(selectedMode);
       if (requestId !== callRequestRef.current) {
@@ -194,20 +201,15 @@ export const InstantCallPage: React.FC = () => {
       startRingtone();
     } catch (error) {
       if (requestId === callRequestRef.current) {
-        const code = typeof error === 'object' && error !== null && 'code' in error ? String(error.code) : '';
-        const reason = code === 'auth/admin-restricted-operation'
-          ? 'Firebase Authentication is rejecting anonymous sign-in. In Firebase Console, open Authentication → Sign-in method and enable Anonymous, then retry.'
-          : code === 'permission-denied'
-            ? 'Firestore denied the call request. Check that the current Firestore rules are deployed and allow signed-in callers to create call requests.'
-            : error instanceof Error ? error.message : 'Unknown call setup error.';
+        const reason = error instanceof Error ? error.message : 'Unknown call setup error.';
         if (selectedMode === 'voice') {
           stream.getTracks().forEach((track) => track.stop());
           streamRef.current = null;
         }
         setCallError(
           selectedMode === 'video'
-            ? `Camera preview is active, but the call request could not be created. Check Firebase Authentication/Firestore configuration. ${reason}`
-            : `The call request could not be created. Check Firebase Authentication/Firestore configuration. ${reason}`
+            ? `Camera preview is active, but the call request could not be created. ${reason}`
+            : `The call request could not be created. ${reason}`
         );
       }
     }
@@ -271,10 +273,29 @@ export const InstantCallPage: React.FC = () => {
       <section className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-14">
         <div className="grid grid-cols-1 lg:grid-cols-[1.2fr_0.8fr] gap-8">
           <div className="bg-[#111412] border border-[#242C26] rounded-2xl p-6 sm:p-8 shadow-2xl">
+            {!user && (
+              <form className="mb-8 rounded-xl border border-[#343B34] bg-[#0B0D0C] p-5" onSubmit={async (event) => {
+                event.preventDefault(); setCallError('');
+                if (!auth) { setCallError('Firebase sign-in is not configured.'); return; }
+                try { await signInWithEmailAndPassword(auth, email, password); }
+                catch (error) { setCallError(error instanceof Error ? error.message : 'Could not sign in.'); }
+              }}>
+                <h2 className="text-lg font-semibold text-white">Sign in to continue</h2>
+                <p className="mt-1 text-sm text-[#A8A498]">Create an account or sign in before placing a call.</p>
+                <label className="mt-4 block text-xs text-[#CFC8B8]">Email<input type="email" required value={email} onChange={(event) => setEmail(event.target.value)} className="mt-2 w-full rounded border border-[#303831] bg-[#111412] px-3 py-2.5 text-sm text-white" /></label>
+                <label className="mt-3 block text-xs text-[#CFC8B8]">Password<input type="password" minLength={6} required value={password} onChange={(event) => setPassword(event.target.value)} className="mt-2 w-full rounded border border-[#303831] bg-[#111412] px-3 py-2.5 text-sm text-white" /></label>
+                {callError && <p role="alert" className="mt-3 text-sm text-red-300">{callError}</p>}
+                <div className="mt-4 flex flex-wrap gap-2">
+                  <button type="submit" disabled={!authReady} className="gold-button-gradient rounded px-4 py-2 text-xs font-bold uppercase tracking-wider">Sign in</button>
+                  <button type="button" disabled={!authReady || !auth} onClick={async () => { try { if (!auth) return; await createUserWithEmailAndPassword(auth, email, password); } catch (error) { setCallError(error instanceof Error ? error.message : 'Could not create account.'); } }} className="rounded border border-[#3A493D] px-4 py-2 text-xs font-bold uppercase tracking-wider text-emerald-200">Create account</button>
+                  <button type="button" disabled={!authReady || !auth} onClick={async () => { try { if (!auth) return; await signInWithPopup(auth, new GoogleAuthProvider()); } catch (error) { setCallError(error instanceof Error ? error.message : 'Google sign-in failed.'); } }} className="rounded border border-[#303831] px-4 py-2 text-xs text-white">Continue with Google</button>
+                </div>
+              </form>
+            )}
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-8">
               <button
                 type="button"
-                disabled={isCalling}
+                disabled={isCalling || !user}
                 onClick={() => {
                   setSelectedMode('voice');
                 }}
@@ -344,7 +365,7 @@ export const InstantCallPage: React.FC = () => {
               <button
                 type="button"
                 onClick={() => void startCall()}
-                disabled={isCalling}
+                disabled={isCalling || !user}
                 className="gold-button-gradient w-full py-3.5 rounded text-xs uppercase tracking-[0.2em] font-bold flex items-center justify-center gap-2.5 disabled:opacity-60"
               >
                 {selectedMode === 'voice' ? <PhoneCall className="w-4 h-4" /> : <Video className="w-4 h-4" />}
@@ -382,6 +403,10 @@ export const InstantCallPage: React.FC = () => {
                 </div>
               </div>
             </div>
+            <Link to="/call-history" className="inline-flex w-full items-center justify-center gap-2 rounded-xl border border-[#C5A059]/60 bg-[#171B18] px-5 py-4 text-xs font-bold uppercase tracking-[0.16em] text-[#E5C378] transition-colors hover:bg-[#202720]">
+              <PhoneCall className="h-4 w-4" />
+              Recent Call
+            </Link>
 
           </div>
         </div>

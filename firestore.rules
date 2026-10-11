@@ -1,48 +1,10 @@
 rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
-    function signedIn() {
-      return request.auth != null;
+    // All application data is accessed by the trusted backend through Firebase Admin.
+    // Firebase Admin bypasses these rules; browser clients cannot read or write records.
+    match /{document=**} {
+      allow read, write: if false;
     }
-
-    function isAgent() {
-      return signedIn()
-        && ((exists(/databases/$(database)/documents/agent/$(request.auth.uid))
-            && get(/databases/$(database)/documents/agent/$(request.auth.uid)).data.active == true)
-          || (exists(/databases/$(database)/documents/agents/$(request.auth.uid))
-            && get(/databases/$(database)/documents/agents/$(request.auth.uid)).data.active == true));
-    }
-
-    function isActiveCallParticipant(callId) {
-      let callPath = /databases/$(database)/documents/calls/$(callId);
-      return signedIn()
-        && exists(callPath)
-        && get(callPath).data.status == 'accepted'
-        && (get(callPath).data.callerUid == request.auth.uid
-          || (isAgent() && get(callPath).data.agentUid == request.auth.uid));
-    }
-
-    match /agent/{agentUid} {
-      allow get: if signedIn() && request.auth.uid == agentUid;
-      allow list, create, update, delete: if false;
-    }
-
-    // Accept the plural collection for compatibility with existing setup instructions/data.
-    match /agents/{agentUid} {
-      allow get: if signedIn() && request.auth.uid == agentUid;
-      allow list, create, update, delete: if false;
-    }
-
-    match /inquiries/{inquiryId} {
-      allow create: if request.resource.data.status == 'new'
-        && request.resource.data.createdAt == request.time
-        && request.resource.data.contactName is string
-        && request.resource.data.contactName.size() > 0
-        && request.resource.data.email is string
-        && request.resource.data.email.size() > 3
-        && request.resource.data.message is string
-        && request.resource.data.message.size() <= 4000;
-      allow read: if isAgent();
-      allow update: if isAgent()
-        && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['status', 'updatedAt'])
-        && request.resource.data.status in ['new', 'in_progress', 'contacted', 'closed'];
+  }
+}

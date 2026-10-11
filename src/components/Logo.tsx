@@ -13,8 +13,7 @@ export const Logo: React.FC<LogoProps> = ({
   size = 'md',
   showTagline = true
 }) => {
-  const logoUrl = 'https://i.postimg.cc/br3B6hpz/Lumera-coffee.jpg';
-  const fallbackUrl = '/lumera-coffee-logo.jpg';
+  const logoUrl = '/lumera-coffee-logo.jpg';
 
   const circleSizeClasses = {
     sm: 'w-8 h-8',
@@ -46,11 +45,6 @@ export const Logo: React.FC<LogoProps> = ({
           src={logoUrl}
           alt="Lumera Coffee"
           className="w-full h-full object-cover rounded-full transition-transform duration-300 hover:scale-105"
-          onError={(e) => {
-            if (e.currentTarget.src !== fallbackUrl) {
-              e.currentTarget.src = fallbackUrl;
-            }
-          }}
         />
       </div>
     </div>
@@ -66,7 +60,7 @@ export const Logo: React.FC<LogoProps> = ({
         {circularEmblem}
         <div className="mt-2.5">
           <span className={`block font-crest font-bold text-white uppercase tracking-widest ${titleSizeClasses[size]}`}>
-            LUMERA <span className="gold-text-gradient">COFFEE</span>
+            LUMERA <span className="text-[#F2D46C]">COFFEE</span>
           </span>
           {showTagline && (
             <span className={`block font-sans font-medium uppercase text-[#C5A059] mt-0.5 opacity-90 ${subSizeClasses[size]}`}>
@@ -83,7 +77,7 @@ export const Logo: React.FC<LogoProps> = ({
       {circularEmblem}
       <div className="flex flex-col">
         <span className={`font-crest font-bold text-white uppercase tracking-widest leading-none ${titleSizeClasses[size]}`}>
-          LUMERA <span className="gold-text-gradient">COFFEE</span>
+          LUMERA <span className="text-[#F2D46C]">COFFEE</span>
         </span>
         {showTagline && (
           <span className={`font-sans font-semibold uppercase text-[#C5A059] leading-tight mt-1 opacity-90 ${subSizeClasses[size]}`}>
