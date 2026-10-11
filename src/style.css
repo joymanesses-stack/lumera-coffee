@@ -425,3 +425,20 @@ header nav > div.lg\:hidden { color: #F6F1E5; }
 [class*="bg-[#18261E]"], [class*="bg-[#18201A]"], [class*="bg-[#18231C]"], [class*="bg-[#18221B]"], [class*="bg-[#1A211D]"], [class*="bg-[#1A261D]"], [class*="bg-[#183525]"], [class*="bg-[#163624]"], [class*="bg-[#1B3E2D]"], [class*="bg-[#162019]"], [class*="bg-[#16251C]"], [class*="bg-[#1B221D]"], [class*="bg-[#141C16]"], [class*="bg-[#0E1210]"], [class*="bg-[#1C201D]"], [class*="bg-[#1B201D]"], [class*="bg-[#202721]"], [class*="bg-[#222E25]"], [class*="bg-[#1C241E]"], [class*="bg-[#182019]"] { background-color: #DCE5DA !important; }
 [class*="text-[#C5A059]"], [class*="text-[#E5C378]"], [class*="text-[#E5C983]"], [class*="text-[#F3E5AB]"] { color: #8B4F2A !important; }
 .home-coffee [class*="text-[#C5A059]"], .home-impact [class*="text-[#C5A059]"] { color: #E4BD91 !important; }
+
+/* Keep the footer wordmark colors consistent with the header. */
+footer .footer-brand > div > span:first-child { color: #F6F1E5 !important; }
+footer .footer-brand > div > span:first-child > span { color: #F2D46C !important; }
+@media (max-width: 1023px) {
+  header nav > #mobile-navigation {
+    position: absolute;
+    top: 100%;
+    left: 12px;
+    right: auto;
+    width: min(22rem, calc(100vw - 24px));
+    color: #F6F1E5;
+  }
+  header nav > #mobile-navigation button, header nav > #mobile-navigation a { color: #F6F1E5; }
+  header nav > #mobile-navigation button:hover, header nav > #mobile-navigation a:hover { color: #E7C48C; }
+  header nav > #mobile-navigation button[class*='bg-[#214A35]'] { color: #F7F4EC; }
+}

@@ -82,7 +82,7 @@ export const Navbar: React.FC<NavbarProps> = ({
   return (
     <header ref={navRef} className="fixed top-0 left-0 right-0 z-50 transition-all duration-500">
       <nav 
-        className={`transition-all duration-500 ${
+        className={`relative transition-all duration-500 ${
           isScrolled 
             ? 'bg-[#173B2B]/98 backdrop-blur-md border-b border-[#A96532]/45 py-3.5 shadow-lg shadow-black/20' 
             : 'bg-gradient-to-b from-[#173B2B]/98 via-[#173B2B]/90 to-[#173B2B]/80 backdrop-blur-sm py-5 sm:py-6 border-b border-[#A96532]/35'
@@ -207,8 +207,10 @@ export const Navbar: React.FC<NavbarProps> = ({
             </Link>
             <button
               onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-              className="p-1.5 text-[#D4AF37] hover:text-white transition-colors"
+              className="grid h-10 w-10 place-items-center rounded-lg border border-[#E7C48C]/60 bg-[#102A1E] text-[#F2D46C] shadow-md transition-colors hover:bg-[#214A35] hover:text-white focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#F2D46C]"
               aria-label="Toggle menu"
+              aria-expanded={mobileMenuOpen}
+              aria-controls="mobile-navigation"
             >
               {mobileMenuOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
             </button>
@@ -217,7 +219,11 @@ export const Navbar: React.FC<NavbarProps> = ({
 
         {/* Mobile Navigation Drawer */}
         {mobileMenuOpen && (
-          <div className="lg:hidden bg-[#173B2B] border-b border-[#A96532]/40 px-6 py-6 animate-fadeIn shadow-2xl max-h-[85vh] overflow-y-auto">
+          <div
+            id="mobile-navigation"
+            style={{ position: 'absolute', top: '100%', left: 12, right: 'auto', width: 'min(22rem, calc(100vw - 24px))' }}
+            className="z-50 lg:hidden rounded-xl border border-[#A96532]/55 bg-[#173B2B] px-5 py-5 text-[#F6F1E5] shadow-2xl shadow-black/35 max-h-[min(80vh,42rem)] overflow-y-auto animate-fadeIn"
+          >
             <div className="flex flex-col space-y-2">
               {navItems.map((item) => {
                 const config = NAV_DROPDOWNS[item.path];

@@ -63,7 +63,7 @@ export const Footer: React.FC<FooterProps> = ({
           {/* Brand Column */}
           <div className="lg:col-span-2 space-y-4">
             <Link to="/">
-              <Logo size="lg" />
+              <Logo size="lg" className="footer-brand" />
             </Link>
             <p className="text-xs text-[#A8A49A] leading-relaxed max-w-sm mt-3 font-light">
               Lumera Company Ltd is a Rwandan coffee brand offering green Arabica beans and roasted coffee from Karongi and Nyamasheke.
