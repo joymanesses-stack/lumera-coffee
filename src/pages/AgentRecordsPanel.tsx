@@ -3,7 +3,7 @@ import { CheckCircle2, Clock3, Eye, Trash2, X } from 'lucide-react';
 
 export type AgentInquiry = { id: string; contactName?: string; companyName?: string; email?: string; phone?: string; coffeeType?: string; quantityRequired?: string; message?: string; status?: string; createdAt?: string };
 export type AgentCall = { id: string; callerUid?: string; caller?: { name?: string; email?: string; phone?: string }; mode?: string; status?: string; createdAt?: string; acceptedAt?: string; missedAt?: string; endedAt?: string };
-export type AgentCustomer = { uid: string; email?: string; displayName?: string; active?: boolean };
+export type AgentCustomer = { uid: string; email?: string; displayName?: string; disabled?: boolean };
 const dateLabel = (value?: string) => value ? new Date(value).toLocaleString() : 'Not recorded';
 
 export function AgentRecordsPanel({ calls, inquiries, customers, onUpdateInquiry, onDeleteInquiry, onDeleteCall, onDeleteCustomer }: {
@@ -40,8 +40,8 @@ export function AgentRecordsPanel({ calls, inquiries, customers, onUpdateInquiry
     </div>
     <section className="mt-6 rounded-2xl border border-[#252D27] bg-[#111412] p-5">
       <h2 className="mb-4 text-xl font-bold text-white">Customer accounts ({customers.length})</h2>
-      <p className="mb-4 text-xs text-[#A8A498]">Disabling an account prevents sign-in. Records remain available for audit.</p>
-      <div className="grid gap-2 sm:grid-cols-2 lg:grid-cols-3">{customers.map((customer) => <article key={customer.uid} className="flex min-w-0 items-center justify-between gap-2 rounded border border-[#303831] bg-[#0B0D0C] p-3"><div className="min-w-0"><b className="block truncate text-sm">{customer.displayName || 'Customer'}</b><span className="block truncate text-xs text-[#A8A498]">{customer.email || customer.uid}</span></div><button title="Disable customer account" onClick={() => onDeleteCustomer(customer.uid)} className="rounded border border-red-900 p-2 text-red-300"><Trash2 className="h-4 w-4"/></button></article>)}</div>
+      <p className="mb-4 text-xs text-[#A8A498]">Deleting removes the Firebase sign-in account so the same email can register again. Historical calls and messages remain.</p>
+      <div className="grid gap-2 sm:grid-cols-2 lg:grid-cols-3">{customers.map((customer) => <article key={customer.uid} className="flex min-w-0 items-center justify-between gap-2 rounded border border-[#303831] bg-[#0B0D0C] p-3"><div className="min-w-0"><b className="block truncate text-sm">{customer.displayName || 'Customer'}{customer.disabled ? ' · Disabled' : ''}</b><span className="block truncate text-xs text-[#A8A498]">{customer.email || customer.uid}</span></div><button title="Permanently delete customer account" aria-label={`Delete account ${customer.email || customer.uid}`} onClick={() => onDeleteCustomer(customer.uid)} className="rounded border border-red-900 p-2 text-red-300"><Trash2 className="h-4 w-4"/></button></article>)}</div>
       {!customers.length && <p className="text-sm text-[#858177]">No customer accounts found.</p>}
     </section>
     {(selectedCall || selectedInquiry) && <div role="dialog" aria-modal="true" className="fixed inset-0 z-[100] flex items-center justify-center bg-black/70 p-4" onMouseDown={(event) => { if (event.target === event.currentTarget) { setSelectedCall(null); setSelectedInquiry(null); } }}><div className="w-full max-w-xl rounded-2xl border border-[#39463C] bg-[#111412] p-6 text-[#DEDBD2]">

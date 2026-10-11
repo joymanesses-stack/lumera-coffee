@@ -237,6 +237,23 @@ const httpServer = http.createServer(async (request, response) => {
       const [users, agents, calls, inquiries] = await Promise.all([getAuth().listUsers(1000), firestore.collection('agent').get(), firestore.collection('calls').get(), firestore.collection('inquiries').get()]);
       return send(response, 200, { users: users.users.map((u) => ({ uid: u.uid, email: u.email || '', displayName: u.displayName || '', disabled: u.disabled, role: u.customClaims?.admin ? 'admin' : u.customClaims?.agent ? 'agent' : 'customer' })), agents: agents.docs.map((d) => ({ uid: d.id, ...d.data() })), calls: calls.docs.map((d) => ({ id: d.id, ...d.data() })), inquiries: inquiries.docs.map((d) => ({ id: d.id, ...d.data() })) });
     }
+    if (url.pathname === '/v1/agent/customers' && request.method === 'GET') {
+      if (!isAgent) return send(response, 403, { error: 'Agent access is required.' });
+      const users = await getAuth().listUsers(1000);
+      const customers = users.users.filter((user) => !user.customClaims?.admin && !user.customClaims?.agent).map((user) => ({ uid: user.uid, email: user.email || '', displayName: user.displayName || '', disabled: user.disabled }));
+      return send(response, 200, { customers });
+    }
+    const customerMatch = url.pathname.match(/^\/v1\/agent\/customers\/([^/]+)$/);
+    if (customerMatch && request.method === 'DELETE') {
+      if (!isAgent) return send(response, 403, { error: 'Agent access is required.' });
+      const uid = customerMatch[1];
+      if (uid === actor.uid) return send(response, 400, { error: 'You cannot delete your own account.' });
+      const user = await getAuth().getUser(uid);
+      if (user.customClaims?.admin || user.customClaims?.agent) return send(response, 403, { error: 'Admin and agent accounts cannot be deleted here.' });
+      await getAuth().deleteUser(uid);
+      await Promise.all([firestore.collection('agent').doc(uid).delete().catch(() => {}), firestore.collection('agents').doc(uid).delete().catch(() => {})]);
+      return send(response, 200, { ok: true });
+    }
     const roleMatch = url.pathname.match(/^\/v1\/admin\/users\/([^/]+)\/role$/);
     if (roleMatch && request.method === 'PATCH') {
       if (!actor.admin) return send(response, 403, { error: 'Admin access is required.' });

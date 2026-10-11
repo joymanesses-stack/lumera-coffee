@@ -1,6 +1,6 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { Link } from 'react-router-dom';
-import { createUserWithEmailAndPassword, onAuthStateChanged, signInWithEmailAndPassword, signInWithPopup, GoogleAuthProvider, type User } from 'firebase/auth';
+import { createUserWithEmailAndPassword, onAuthStateChanged, signInWithEmailAndPassword, signInWithPopup, sendPasswordResetEmail, updateProfile, GoogleAuthProvider, type User } from 'firebase/auth';
 import { ArrowLeft, CheckCircle2, PhoneCall, Video, Bot, ShieldCheck, Sparkles, PhoneOff, LoaderCircle } from 'lucide-react';
 import {
   connectWebRTCCall,
@@ -17,6 +17,7 @@ export const InstantCallPage: React.FC = () => {
   const [user, setUser] = useState<User | null>(null);
   const [authReady, setAuthReady] = useState(false);
   const [email, setEmail] = useState('');
+  const [displayName, setDisplayName] = useState('');
   const [password, setPassword] = useState('');
   const [selectedMode, setSelectedMode] = useState<CallMode>('voice');
   const [isCalling, setIsCalling] = useState(false);
@@ -277,17 +278,19 @@ export const InstantCallPage: React.FC = () => {
               <form className="mb-8 rounded-xl border border-[#343B34] bg-[#0B0D0C] p-5" onSubmit={async (event) => {
                 event.preventDefault(); setCallError('');
                 if (!auth) { setCallError('Firebase sign-in is not configured.'); return; }
-                try { await signInWithEmailAndPassword(auth, email, password); }
+                try { await signInWithEmailAndPassword(auth, email.trim(), password); }
                 catch (error) { setCallError(error instanceof Error ? error.message : 'Could not sign in.'); }
               }}>
                 <h2 className="text-lg font-semibold text-white">Sign in to continue</h2>
                 <p className="mt-1 text-sm text-[#A8A498]">Create an account or sign in before placing a call.</p>
+                <label className="mt-4 block text-xs text-[#CFC8B8]">Full name <span className="text-[#858177]">(for new accounts)</span><input type="text" autoComplete="name" value={displayName} onChange={(event) => setDisplayName(event.target.value)} className="mt-2 w-full rounded border border-[#303831] bg-[#111412] px-3 py-2.5 text-sm text-white" /></label>
                 <label className="mt-4 block text-xs text-[#CFC8B8]">Email<input type="email" required value={email} onChange={(event) => setEmail(event.target.value)} className="mt-2 w-full rounded border border-[#303831] bg-[#111412] px-3 py-2.5 text-sm text-white" /></label>
                 <label className="mt-3 block text-xs text-[#CFC8B8]">Password<input type="password" minLength={6} required value={password} onChange={(event) => setPassword(event.target.value)} className="mt-2 w-full rounded border border-[#303831] bg-[#111412] px-3 py-2.5 text-sm text-white" /></label>
                 {callError && <p role="alert" className="mt-3 text-sm text-red-300">{callError}</p>}
                 <div className="mt-4 flex flex-wrap gap-2">
                   <button type="submit" disabled={!authReady} className="gold-button-gradient rounded px-4 py-2 text-xs font-bold uppercase tracking-wider">Sign in</button>
-                  <button type="button" disabled={!authReady || !auth} onClick={async () => { try { if (!auth) return; await createUserWithEmailAndPassword(auth, email, password); } catch (error) { setCallError(error instanceof Error ? error.message : 'Could not create account.'); } }} className="rounded border border-[#3A493D] px-4 py-2 text-xs font-bold uppercase tracking-wider text-emerald-200">Create account</button>
+                  <button type="button" disabled={!authReady || !auth} onClick={async () => { setCallError(''); const normalizedEmail = email.trim(); if (!displayName.trim()) { setCallError('Enter your full name to create an account.'); return; } if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(normalizedEmail)) { setCallError('Enter a valid email address.'); return; } if (password.length < 6) { setCallError('Password must be at least 6 characters.'); return; } try { if (auth) { const credential = await createUserWithEmailAndPassword(auth, normalizedEmail, password); await updateProfile(credential.user, { displayName: displayName.trim() }); } } catch (error) { setCallError(error instanceof Error ? error.message : 'Could not create account.'); } }} className="rounded border border-[#3A493D] px-4 py-2 text-xs font-bold uppercase tracking-wider text-emerald-200">Create account</button>
+                  <button type="button" disabled={!auth} onClick={async () => { setCallError(''); const normalizedEmail = email.trim(); if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(normalizedEmail)) { setCallError('Enter your account email address first.'); return; } try { await sendPasswordResetEmail(auth!, normalizedEmail); setCallError('Password reset email sent. Check your inbox.'); } catch (error) { setCallError(error instanceof Error ? error.message : 'Could not send password reset email.'); } }} className="rounded border border-[#303831] px-4 py-2 text-xs text-white">Forgot password?</button>
                   <button type="button" disabled={!authReady || !auth} onClick={async () => { try { if (!auth) return; await signInWithPopup(auth, new GoogleAuthProvider()); } catch (error) { setCallError(error instanceof Error ? error.message : 'Google sign-in failed.'); } }} className="rounded border border-[#303831] px-4 py-2 text-xs text-white">Continue with Google</button>
                 </div>
               </form>

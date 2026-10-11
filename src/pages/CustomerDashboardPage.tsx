@@ -5,7 +5,9 @@ import {
   onAuthStateChanged,
   signInWithEmailAndPassword,
   signInWithPopup,
+  sendPasswordResetEmail,
   signOut,
+  updateProfile,
   type User,
 } from 'firebase/auth';
 import { io } from 'socket.io-client';
@@ -24,6 +26,7 @@ export const CustomerDashboardPage: React.FC = () => {
   const [user, setUser] = useState<User | null>(null);
   const [authReady, setAuthReady] = useState(false);
   const [email, setEmail] = useState('');
+  const [displayName, setDisplayName] = useState('');
   const [password, setPassword] = useState('');
   const [conversations, setConversations] = useState<Conversation[]>([]);
   const [conversationId, setConversationId] = useState('');
@@ -124,8 +127,17 @@ export const CustomerDashboardPage: React.FC = () => {
   const handleAuth = async (event: React.FormEvent) => {
     event.preventDefault(); setError('');
     if (!auth) { setError('Sign-in is not configured. Please contact Lumera.'); return; }
-    try { await signInWithEmailAndPassword(auth, email, password); }
+    try { await signInWithEmailAndPassword(auth, email.trim(), password); }
     catch (e) { setError(e instanceof Error ? e.message : 'Could not sign in.'); }
+  };
+
+  const resetPassword = async () => {
+    setError('');
+    if (!auth) { setError('Sign-in is not configured. Please contact Lumera.'); return; }
+    const normalizedEmail = email.trim();
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(normalizedEmail)) { setError('Enter your account email address first.'); return; }
+    try { await sendPasswordResetEmail(auth, normalizedEmail); setError('Password reset email sent. Check your inbox.'); }
+    catch (e) { setError(e instanceof Error ? e.message : 'Could not send password reset email.'); }
   };
 
   return (
@@ -137,12 +149,14 @@ export const CustomerDashboardPage: React.FC = () => {
         {authReady && !user && (
           <form onSubmit={handleAuth} className={`${panelClass} mx-auto mt-8 max-w-md`}>
             <h2 className="text-xl font-semibold text-white">Sign in to your account</h2>
-            <label className="mt-5 block text-xs text-[#CFC8B8]">Email<input type="email" required autoComplete="email" value={email} onChange={(e) => setEmail(e.target.value)} className={fieldClass} /></label>
+            <label className="mt-5 block text-xs text-[#CFC8B8]">Full name <span className="text-[#858177]">(for new accounts)</span><input type="text" autoComplete="name" value={displayName} onChange={(e) => setDisplayName(e.target.value)} className={fieldClass} /></label>
+            <label className="mt-4 block text-xs text-[#CFC8B8]">Email<input type="email" required autoComplete="email" value={email} onChange={(e) => setEmail(e.target.value)} className={fieldClass} /></label>
             <label className="mt-4 block text-xs text-[#CFC8B8]">Password<input type="password" required autoComplete="current-password" value={password} onChange={(e) => setPassword(e.target.value)} className={fieldClass} /></label>
             {error && <p role="alert" className="mt-3 text-sm text-red-300">{error}</p>}
             <div className="mt-5 flex flex-wrap gap-2">
               <button disabled={!auth} className="rounded bg-[#C5A059] px-4 py-2.5 text-xs font-bold uppercase text-black disabled:opacity-50">Sign in</button>
-              <button type="button" disabled={!auth} onClick={async () => { setError(''); try { if (auth) await createUserWithEmailAndPassword(auth, email, password); } catch (e) { setError(e instanceof Error ? e.message : 'Could not create account.'); } }} className="rounded border border-[#3A493D] px-4 py-2.5 text-xs font-bold uppercase text-emerald-200 disabled:opacity-50">Create account</button>
+              <button type="button" disabled={!auth} onClick={async () => { setError(''); const normalizedEmail = email.trim(); if (!displayName.trim()) { setError('Enter your full name to create an account.'); return; } if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(normalizedEmail)) { setError('Enter a valid email address.'); return; } if (password.length < 6) { setError('Password must be at least 6 characters.'); return; } try { if (auth) { const credential = await createUserWithEmailAndPassword(auth, normalizedEmail, password); await updateProfile(credential.user, { displayName: displayName.trim() }); } } catch (e) { setError(e instanceof Error ? e.message : 'Could not create account.'); } }} className="rounded border border-[#3A493D] px-4 py-2.5 text-xs font-bold uppercase text-emerald-200 disabled:opacity-50">Create account</button>
+              <button type="button" onClick={() => void resetPassword()} className="rounded border border-[#303831] px-4 py-2.5 text-xs text-white">Forgot password?</button>
               <button type="button" disabled={!auth} onClick={async () => { setError(''); try { if (auth) await signInWithPopup(auth, new GoogleAuthProvider()); } catch (e) { setError(e instanceof Error ? e.message : 'Google sign-in failed.'); } }} className="rounded border border-[#303831] px-4 py-2.5 text-xs text-white disabled:opacity-50">Continue with Google</button>
             </div>
           </form>
