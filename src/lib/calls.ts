@@ -4,7 +4,7 @@ import { apiRequest, backendUrl, getBackendToken } from './api';
 export type CallMode = 'voice' | 'video';
 export type CallStatus = 'ringing' | 'accepted' | 'declined' | 'ended' | 'missed';
 export type CallRole = 'caller' | 'agent';
-export interface CallRequest { id: string; mode: CallMode; channel: string; callerUid: string; status: CallStatus; createdAt?: string; }
+export interface CallRequest { id: string; mode: CallMode; channel: string; callerUid: string; agentUid?: string; caller?: { name?: string; email?: string; phone?: string }; status: CallStatus; createdAt?: string; acceptedAt?: string; missedAt?: string; endedAt?: string; }
 
 export async function createCallRequest(mode: CallMode): Promise<string> {
   const { call } = await apiRequest<{ call: CallRequest }>('/v1/calls', { method: 'POST', body: JSON.stringify({ mode }) });

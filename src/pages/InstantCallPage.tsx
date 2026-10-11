@@ -418,7 +418,7 @@ export const InstantCallPage: React.FC = () => {
             role="dialog"
             aria-modal="true"
             aria-labelledby="call-dialog-title"
-            className="w-full max-w-xl rounded-2xl border border-[#343B34] bg-[#111412] p-6 shadow-2xl sm:p-8"
+            className="w-full max-w-5xl rounded-2xl border border-[#343B34] bg-[#111412] p-6 shadow-2xl sm:p-8"
           >
             <div className="flex items-center justify-between gap-4">
               <div>
@@ -441,7 +441,7 @@ export const InstantCallPage: React.FC = () => {
             </div>
 
             {selectedMode === 'video' ? (
-              <div className="mt-6 grid grid-cols-2 gap-3">
+              <div className="mt-6 grid grid-cols-1 gap-3 sm:grid-cols-2">
                 <div ref={localCallRef} className="relative flex aspect-video items-center justify-center overflow-hidden rounded-xl border border-[#29312B] bg-[#080A09]">
                   {localStream && (
                     <video ref={videoRef} autoPlay muted playsInline className="absolute inset-0 h-full w-full object-cover" />

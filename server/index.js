@@ -71,7 +71,7 @@ const httpServer = http.createServer(async (request, response) => {
   const origin = request.headers.origin;
   if (origin && allowedOrigins.includes(origin)) response.allowedOrigin = origin;
   if (request.method === 'OPTIONS' && response.allowedOrigin) {
-    response.writeHead(204, { 'access-control-allow-origin': origin, 'access-control-allow-methods': 'GET,POST,PATCH,OPTIONS', 'access-control-allow-headers': 'content-type,authorization', 'vary': 'Origin' }); response.end(); return;
+    response.writeHead(204, { 'access-control-allow-origin': origin, 'access-control-allow-methods': 'GET,POST,PATCH,DELETE,OPTIONS', 'access-control-allow-headers': 'content-type,authorization', 'vary': 'Origin' }); response.end(); return;
   }
   try {
     const url = new URL(request.url, 'http://localhost');
@@ -93,6 +93,49 @@ const httpServer = http.createServer(async (request, response) => {
     }
     const bearer = request.headers.authorization?.startsWith('Bearer ') ? request.headers.authorization.slice(7) : null;
     const actor = await resolveSession(bearer);
+    const isAgent = actor.agent || actor.admin;
+    const callsWithCaller = async (docs) => Promise.all(docs.map(async (doc) => {
+      const call = { id: doc.id, ...doc.data() };
+      try {
+        const customer = await getAuth().getUser(call.callerUid);
+        call.caller = { name: customer.displayName || '', email: customer.email || '', phone: customer.phoneNumber || '' };
+      } catch { call.caller = {}; }
+      return call;
+    }));
+    if (url.pathname === '/v1/agent/bin/calls' && request.method === 'GET') {
+      if (!isAgent) return send(response, 403, { error: 'Agent access is required.' });
+      const snapshot = await firestore.collection('calls').where('inBin', '==', true).get();
+      const calls = await callsWithCaller(snapshot.docs);
+      calls.sort((a, b) => new Date(b.deletedAt?._seconds ? b.deletedAt._seconds * 1000 : b.deletedAt || 0) - new Date(a.deletedAt?._seconds ? a.deletedAt._seconds * 1000 : a.deletedAt || 0));
+      return send(response, 200, { calls });
+    }
+    const binCallMatch = url.pathname.match(/^\/v1\/agent\/bin\/calls\/([^/]+)(?:\/(restore))?$/);
+    if (binCallMatch && request.method === 'POST' && binCallMatch[2] === 'restore') {
+      if (!isAgent) return send(response, 403, { error: 'Agent access is required.' });
+      const ref = firestore.collection('calls').doc(binCallMatch[1]);
+      const snapshot = await ref.get();
+      if (!snapshot.exists || !snapshot.data().inBin) return send(response, 404, { error: 'Call not found in Bin.' });
+      await ref.update({ inBin: false, deletedAt: null, deletedBy: null });
+      return send(response, 200, { ok: true });
+    }
+    if (binCallMatch && request.method === 'DELETE' && !binCallMatch[2]) {
+      if (!isAgent) return send(response, 403, { error: 'Agent access is required.' });
+      const ref = firestore.collection('calls').doc(binCallMatch[1]);
+      const snapshot = await ref.get();
+      if (!snapshot.exists || !snapshot.data().inBin) return send(response, 404, { error: 'Call not found in Bin.' });
+      await ref.delete();
+      return send(response, 200, { ok: true });
+    }
+    const agentCallMatch = url.pathname.match(/^\/v1\/agent\/calls\/([^/]+)$/);
+    if (agentCallMatch && request.method === 'DELETE') {
+      if (!isAgent) return send(response, 403, { error: 'Agent access is required.' });
+      const ref = firestore.collection('calls').doc(agentCallMatch[1]);
+      const snapshot = await ref.get();
+      if (!snapshot.exists) return send(response, 404, { error: 'Call not found.' });
+      if (snapshot.data().status === 'ringing' || snapshot.data().status === 'accepted') return send(response, 409, { error: 'Active calls cannot be moved to Bin.' });
+      await ref.update({ inBin: true, deletedAt: new Date(), deletedBy: actor.uid });
+      return send(response, 200, { ok: true });
+    }
     if (url.pathname === '/v1/conversations' && request.method === 'POST') {
       const existing = await firestore.collection('conversations').where('userUid', '==', actor.uid).where('status', '==', 'open').limit(1).get();
       if (!existing.empty) return send(response, 200, { conversation: { id: existing.docs[0].id, ...existing.docs[0].data() } });
@@ -152,16 +195,28 @@ const httpServer = http.createServer(async (request, response) => {
       if (request.method === 'POST' && callMatch[2] === 'end') {
         await ref.update({ status: 'ended', endedAt: new Date() }); return send(response, 200, { ok: true });
       }
-      if (request.method === 'GET' && !callMatch[2]) return send(response, 200, { call: { id: snap.id, ...call } });
+      if (request.method === 'GET' && !callMatch[2]) {
+        const result = { id: snap.id, ...call };
+        if (actor.agent || actor.admin) {
+          try {
+            const customer = await getAuth().getUser(call.callerUid);
+            result.caller = { name: customer.displayName || '', email: customer.email || '', phone: customer.phoneNumber || '' };
+          } catch { result.caller = {}; }
+        }
+        return send(response, 200, { call: result });
+      }
     }
     if (url.pathname === '/v1/agent/dashboard' || url.pathname === '/v1/agent/calls' || url.pathname === '/v1/agent/inquiries') {
       if (!actor.agent && !actor.admin) return send(response, 403, { error: 'Agent access is required.' });
-      const [calls, inquiries, conversations] = await Promise.all([
+      const [calls, inquiries, conversations, history] = await Promise.all([
         firestore.collection('calls').where('status', '==', 'ringing').limit(50).get(),
         firestore.collection('inquiries').orderBy('createdAt', 'desc').limit(50).get(),
         firestore.collection('conversations').where('status', '==', 'open').limit(100).get(),
+        firestore.collection('calls').orderBy('createdAt', 'desc').limit(200).get(),
       ]);
-      const result = { calls: calls.docs.map((d) => ({ id: d.id, ...d.data() })), inquiries: inquiries.docs.map((d) => ({ id: d.id, ...d.data() })), conversations: conversations.docs.map((d) => ({ id: d.id, ...d.data() })) };
+      const incomingCalls = await callsWithCaller(calls.docs.filter((d) => !d.data().inBin));
+      const callHistory = await callsWithCaller(history.docs.filter((d) => !d.data().inBin && d.data().status !== 'ringing'));
+      const result = { calls: incomingCalls, callHistory, inquiries: inquiries.docs.map((d) => ({ id: d.id, ...d.data() })), conversations: conversations.docs.map((d) => ({ id: d.id, ...d.data() })) };
       return send(response, 200, url.pathname.endsWith('/calls') ? { calls: result.calls } : url.pathname.endsWith('/inquiries') ? { inquiries: result.inquiries } : result);
     }
     const inquiryMatch = url.pathname.match(/^\/v1\/agent\/inquiries\/([^/]+)$/);

@@ -22,6 +22,7 @@ import { Phone } from 'lucide-react';
 const AgentDashboardPage = lazy(() =>
   import('./pages/AgentDashboardPage').then((module) => ({ default: module.AgentDashboardPage }))
 );
+const AgentCallPage = lazy(() => import('./pages/AgentCallPage').then((module) => ({ default: module.AgentCallPage })));
 const AgentBinPage = lazy(() => import('./pages/AgentBinPage').then((module) => ({ default: module.AgentBinPage })));
 const InstantCallPage = lazy(() =>
   import('./pages/InstantCallPage').then((module) => ({ default: module.InstantCallPage }))
@@ -101,6 +102,7 @@ export function App() {
                 </Suspense>
               }
             />
+            <Route path="/agent/call/:callId" element={<Suspense fallback={<div className="fixed inset-0 z-[120] bg-[#0B0D0C] pt-40 text-center text-[#A8A498]">Opening call…</div>}><AgentCallPage /></Suspense>} />
             <Route
               path="/agent/bin"
               element={
